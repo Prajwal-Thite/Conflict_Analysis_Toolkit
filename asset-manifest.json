@@ -1,37 +1,16 @@
 {
   "files": {
     "main.css": "/Conflict_Analysis_Toolkit/static/css/main.e8183e57.css",
-    "main.js": "/Conflict_Analysis_Toolkit/static/js/main.dec15a62.js",
+    "main.js": "/Conflict_Analysis_Toolkit/static/js/main.be36b114.js",
     "static/js/453.3436113e.chunk.js": "/Conflict_Analysis_Toolkit/static/js/453.3436113e.chunk.js",
-    "static/media/destruction.svg": "/Conflict_Analysis_Toolkit/static/media/destruction.9f07d42caf77439f0db0e6dbf356808f.svg",
-    "static/media/fatality_medium.svg": "/Conflict_Analysis_Toolkit/static/media/fatality_medium.897d861557ae954659d263973379a8ba.svg",
-    "static/media/fatality_low.svg": "/Conflict_Analysis_Toolkit/static/media/fatality_low.74c3553a5b5c115c3789f486d081cb36.svg",
-    "static/media/fatality_high.svg": "/Conflict_Analysis_Toolkit/static/media/fatality_high.3f4a1be5b825f27578379885f4c01f89.svg",
-    "static/media/abduction.svg": "/Conflict_Analysis_Toolkit/static/media/abduction.a14dcd2236ecc36dc80596299112078f.svg",
-    "static/media/non_violent.svg": "/Conflict_Analysis_Toolkit/static/media/non_violent.12dd1e0c55e1ca6ddbc3dd4d47f938d7.svg",
-    "static/media/protest.svg": "/Conflict_Analysis_Toolkit/static/media/protest.3dbac7b4755ee1c6e0376b691e8524b1.svg",
     "static/media/spritesheet.svg": "/Conflict_Analysis_Toolkit/static/media/spritesheet.a4e0eb7ad904a4858361.svg",
-    "static/media/mob_violence.svg": "/Conflict_Analysis_Toolkit/static/media/mob_violence.7e96d6c0aac8139e48a5d8f8e3bbca86.svg",
-    "static/media/regains_territory.svg": "/Conflict_Analysis_Toolkit/static/media/regains_territory.992b7646fecf339108096e867abec995.svg",
-    "static/media/disrupted.svg": "/Conflict_Analysis_Toolkit/static/media/disrupted.31a510dd1c2b500d5ec57c25f2f3c923.svg",
-    "static/media/arrest.svg": "/Conflict_Analysis_Toolkit/static/media/arrest.f89cfd71ff40951c29957f4568f7448f.svg",
-    "static/media/agreement.svg": "/Conflict_Analysis_Toolkit/static/media/agreement.df7492bd5cf5b7e958049c9f97d7171a.svg",
-    "static/media/attack.svg": "/Conflict_Analysis_Toolkit/static/media/attack.b65b578c1595411cdf8bce12e742b07a.svg",
-    "static/media/group.svg": "/Conflict_Analysis_Toolkit/static/media/group.40d65959c1bc3448982c16a1929277f2.svg",
-    "static/media/non_state_actor.svg": "/Conflict_Analysis_Toolkit/static/media/non_state_actor.427c73dc9a381f7bb9e6f3ddc0007bfa.svg",
-    "static/media/artillery.svg": "/Conflict_Analysis_Toolkit/static/media/artillery.0073d7e1084b2bde57e3ed0d65c99ce6.svg",
-    "static/media/grenade.svg": "/Conflict_Analysis_Toolkit/static/media/grenade.68dbfd55978878e042dc44b5a0ab8231.svg",
-    "static/media/other.svg": "/Conflict_Analysis_Toolkit/static/media/other.b86682db1b7441fc77e0db81eb839c25.svg",
-    "static/media/armed_clash.svg": "/Conflict_Analysis_Toolkit/static/media/armed_clash.688c440ce37914b4e7d892bf3534ddce.svg",
-    "static/media/drone.svg": "/Conflict_Analysis_Toolkit/static/media/drone.6b0bb575d3ed2cac66397b87c20906b6.svg",
-    "static/media/explosive.svg": "/Conflict_Analysis_Toolkit/static/media/explosive.bba39e3e4d3dfa8d459c3930fe010685.svg",
     "index.html": "/Conflict_Analysis_Toolkit/index.html",
     "main.e8183e57.css.map": "/Conflict_Analysis_Toolkit/static/css/main.e8183e57.css.map",
-    "main.dec15a62.js.map": "/Conflict_Analysis_Toolkit/static/js/main.dec15a62.js.map",
+    "main.be36b114.js.map": "/Conflict_Analysis_Toolkit/static/js/main.be36b114.js.map",
     "453.3436113e.chunk.js.map": "/Conflict_Analysis_Toolkit/static/js/453.3436113e.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.e8183e57.css",
-    "static/js/main.dec15a62.js"
+    "static/js/main.be36b114.js"
   ]
 }
