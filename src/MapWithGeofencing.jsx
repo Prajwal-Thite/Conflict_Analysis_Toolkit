@@ -480,21 +480,21 @@ const MapWithGeofencing = () => {
                 <strong>Fatalities: </strong> {marker.fatalities}
                 {marker.fatalities <= 5 && (
                     <img 
-                    src="/fatality_low.svg" 
+                    src="/Icons/fatality_low.svg" 
                     style={{ width: '80px', height: '80px', marginLeft: '5px' }}
                     alt="Low"
                     />
                 )}
                 {marker.fatalities > 5 && marker.fatalities <= 20 && (
                     <img 
-                    src="/fatality_medium.svg" 
+                    src="/Icons/fatality_medium.svg" 
                     style={{ width: '80px', height: '80px', marginRight: '5px' }}
                     alt="Medium"
                     />
                 )}
                 {marker.fatalities > 20 && (
                     <img 
-                    src="/fatality_high.svg" 
+                    src="/Icons/fatality_high.svg" 
                     style={{ width: '80px', height: '80px', marginLeft: '5px' }}
                     alt="High"
                     />
