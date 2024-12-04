@@ -13,27 +13,27 @@ import MarkerClusterGroup from 'react-leaflet-markercluster';
 
 
 //Import icons
-import fatalityHighIcon from './Icons/fatality_high.svg';
-import fatalityMediumIcon from './Icons/fatality_medium.svg';
-import fatalityLowIcon from './Icons/fatality_low.svg';
-import droneIcon from './Icons/drone.svg';
-import artilleryIcon from './Icons/artillery.svg';
-import arrestIcon from './Icons/arrest.svg';
-import disruptedIcon from './Icons/disrupted.svg';
-import protestIcon from './Icons/protest.svg';
-import nonStateActorIcon from './Icons/non_state_actor.svg';
-import explosiveIcon from './Icons/explosive.svg';
-import otherIcon from './Icons/other.svg';
-import attackIcon from './Icons/attack.svg';
-import grenadeIcon from './Icons/grenade.svg';
-import groupIcon from './Icons/group.svg';
-import destructionIcon from './Icons/destruction.svg';
-import abductionIcon from './Icons/abduction.svg';
-import regainsTerritoryIcon from './Icons/regains_territory.svg';
-import agreementIcon from './Icons/agreement.svg';
-import mobViolenceIcon from './Icons/mob_violence.svg';
-import nonViolentIcon from './Icons/non_violent.svg';
-import armedClashIcon from './Icons/armed_clash.svg';
+// import fatalityHighIcon from './Icons/fatality_high.svg';
+// import fatalityMediumIcon from './Icons/fatality_medium.svg';
+// import fatalityLowIcon from './Icons/fatality_low.svg';
+// import droneIcon from './Icons/drone.svg';
+// import artilleryIcon from './Icons/artillery.svg';
+// import arrestIcon from './Icons/arrest.svg';
+// import disruptedIcon from './Icons/disrupted.svg';
+// import protestIcon from './Icons/protest.svg';
+// import nonStateActorIcon from './Icons/non_state_actor.svg';
+// import explosiveIcon from './Icons/explosive.svg';
+// import otherIcon from './Icons/other.svg';
+// import attackIcon from './Icons/attack.svg';
+// import grenadeIcon from './Icons/grenade.svg';
+// import groupIcon from './Icons/group.svg';
+// import destructionIcon from './Icons/destruction.svg';
+// import abductionIcon from './Icons/abduction.svg';
+// import regainsTerritoryIcon from './Icons/regains_territory.svg';
+// import agreementIcon from './Icons/agreement.svg';
+// import mobViolenceIcon from './Icons/mob_violence.svg';
+// import nonViolentIcon from './Icons/non_violent.svg';
+// import armedClashIcon from './Icons/armed_clash.svg';
 
 const MapWithGeofencing = () => {
   const [markers, setMarkers] = useState([]);
@@ -224,28 +224,32 @@ const MapWithGeofencing = () => {
 
   //Icons
 
+  const getBasePath = () => {
+    return process.env.NODE_ENV === 'production' 
+      ? '/Conflict_Analysis_Toolkit' 
+      : '';
+  };
+
   const getEventIcon = (subEventType, color) => {
     const iconMapping = {
-      'Air/drone strike': droneIcon,
-      'Shelling/artillery/missile attack': artilleryIcon,
-      'Arrests': arrestIcon,
-      'Disrupted weapons use': disruptedIcon,
-      'Peaceful protest': protestIcon,
-      'Non-state actor overtakes territory': nonStateActorIcon,
-      'Remote explosive/landmine/IED': explosiveIcon,
-      'Other': otherIcon,
-      'Attack': attackIcon,
-      'Grenade': grenadeIcon,
-      'Change to group/activity': groupIcon,
-      'Looting/property destruction': destructionIcon,
-      'Abduction/forced disappearance': abductionIcon,
-      'Government regains territory': regainsTerritoryIcon,
-      'Agreement': agreementIcon,
-      'Mob violence': mobViolenceIcon,
-      'Non-violent transfer of territory': nonViolentIcon,
-      'Armed clash': armedClashIcon,
-
-      
+      'Air/drone strike': `${process.env.PUBLIC_URL}/Icons/drone.svg`,
+      'Shelling/artillery/missile attack': `${process.env.PUBLIC_URL}/Icons/artillery.svg`,
+      'Arrests': `${process.env.PUBLIC_URL}/Icons/arrest.svg`,
+      'Disrupted weapons use': `${process.env.PUBLIC_URL}/Icons/disrupted.svg`,
+      'Peaceful protest': `${process.env.PUBLIC_URL}/Icons/protest.svg`,
+      'Non-state actor overtakes territory': `${process.env.PUBLIC_URL}/Icons/non_state_actor.svg`,
+      'Remote explosive/landmine/IED': `${process.env.PUBLIC_URL}/Icons/explosive.svg`,
+      'Other': `${process.env.PUBLIC_URL}/Icons/other.svg`,
+      'Attack': `${process.env.PUBLIC_URL}/Icons/attack.svg`,
+      'Grenade': `${process.env.PUBLIC_URL}/Icons/grenade.svg`,
+      'Change to group/activity': `${process.env.PUBLIC_URL}/Icons/group.svg`,
+      'Looting/property destruction': `${process.env.PUBLIC_URL}/Icons/destruction.svg`,
+      'Abduction/forced disappearance': `${process.env.PUBLIC_URL}/Icons/abduction.svg`,
+      'Government regains territory': `${process.env.PUBLIC_URL}/Icons/regains_territory.svg`,
+      'Agreement': `${process.env.PUBLIC_URL}/Icons/agreement.svg`,
+      'Mob violence': `${process.env.PUBLIC_URL}/Icons/mob_violence.svg`,
+      'Non-violent transfer of territory': `${process.env.PUBLIC_URL}/Icons/non_violent.svg`,
+      'Armed clash': `${process.env.PUBLIC_URL}/Icons/armed_clash.svg`,
     };
   
     return L.divIcon({
@@ -458,25 +462,26 @@ const MapWithGeofencing = () => {
                 {/* popupbox image */}
 
                 <img 
-                src= {marker.subEventType === 'Air/drone strike' ? droneIcon
-                  : marker.subEventType === 'Shelling/artillery/missile attack' ? artilleryIcon
-                  : marker.subEventType === 'Armed clash' ? armedClashIcon
-                  : marker.subEventType === 'Arrests' ? arrestIcon
-                  : marker.subEventType === 'Disrupted weapons use' ? disruptedIcon
-                  : marker.subEventType === 'Peaceful protest' ? protestIcon
-                  : marker.subEventType === 'Attack' ? attackIcon
-                  : marker.subEventType === 'Remote explosive/landmine/IED' ? explosiveIcon
-                  : marker.subEventType === 'Other' ? otherIcon
-                  : marker.subEventType === 'Change to group/activity' ? groupIcon
-                  : marker.subEventType === 'Looting/property destruction' ? destructionIcon
-                  : marker.subEventType === 'Abduction/forced disappearance' ? abductionIcon
-                  : marker.subEventType === 'Grenade' ? grenadeIcon
-                  : marker.subEventType === 'Government regains territory' ? regainsTerritoryIcon
-                  : marker.subEventType === 'Non-state actor overtakes territory' ? nonStateActorIcon
-                  : marker.subEventType === 'Agreement' ? agreementIcon
-                  : marker.subEventType === 'Mob violence' ? mobViolenceIcon
-                  : marker.subEventType === 'Non-violent transfer of territory' ? nonViolentIcon
-                  : '/default-icon.svg'}
+                    src={`${process.env.PUBLIC_URL}${
+                      marker.subEventType === 'Air/drone strike' ? '/Icons/drone.svg'
+                      : marker.subEventType === 'Shelling/artillery/missile attack' ? '/Icons/artillery.svg'
+                      : marker.subEventType === 'Armed clash' ? '/Icons/armed_clash.svg'
+                      : marker.subEventType === 'Arrests' ? '/Icons/arrest.svg'
+                      : marker.subEventType === 'Disrupted weapons use' ? '/Icons/disrupted.svg'
+                      : marker.subEventType === 'Peaceful protest' ? '/Icons/protest.svg'
+                      : marker.subEventType === 'Attack' ? '/Icons/attack.svg'
+                      : marker.subEventType === 'Remote explosive/landmine/IED' ? '/Icons/explosive.svg'
+                      : marker.subEventType === 'Other' ? '/Icons/other.svg'
+                      : marker.subEventType === 'Change to group/activity' ? '/Icons/group.svg'
+                      : marker.subEventType === 'Looting/property destruction' ? '/Icons/destruction.svg'
+                      : marker.subEventType === 'Abduction/forced disappearance' ? '/Icons/abduction.svg'
+                      : marker.subEventType === 'Grenade' ? '/Icons/grenade.svg'
+                      : marker.subEventType === 'Government regains territory' ? '/Icons/regains_territory.svg'
+                      : marker.subEventType === 'Non-state actor overtakes territory' ? '/Icons/non_state_actor.svg'
+                      : marker.subEventType === 'Agreement' ? '/Icons/agreement.svg'
+                      : marker.subEventType === 'Mob violence' ? '/Icons/mob_violence.svg'
+                      : marker.subEventType === 'Non-violent transfer of territory' ? '/Icons/non_violent.svg'
+                      : '/default-icon.svg'}`}
                   alt={marker.subEventType || 'Event icon'}
                 style={{ 
                     width: '60px', 
@@ -506,21 +511,21 @@ const MapWithGeofencing = () => {
                 <strong>Fatalities: </strong> {marker.fatalities}
                 {marker.fatalities <= 5 && (
                     <img 
-                    src={fatalityLowIcon} 
+                    src={`${process.env.PUBLIC_URL}/Icons/fatality_low.svg`} 
                     style={{ width: '80px', height: '80px', marginLeft: '5px' }}
                     alt="Low"
                     />
                 )}
                 {marker.fatalities > 5 && marker.fatalities <= 20 && (
                     <img 
-                    src={fatalityMediumIcon} 
+                    src={`${process.env.PUBLIC_URL}/Icons/fatality_medium.svg`} 
                     style={{ width: '80px', height: '80px', marginRight: '5px' }}
                     alt="Medium"
                     />
                 )}
                 {marker.fatalities > 20 && (
                     <img 
-                    src={fatalityHighIcon} 
+                    src={`${process.env.PUBLIC_URL}/Icons/fatality_high.svg`} 
                     style={{ width: '80px', height: '80px', marginLeft: '5px' }}
                     alt="High"
                     />
