@@ -11,30 +11,6 @@ import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 
-
-//Import icons
-// import fatalityHighIcon from './Icons/fatality_high.svg';
-// import fatalityMediumIcon from './Icons/fatality_medium.svg';
-// import fatalityLowIcon from './Icons/fatality_low.svg';
-// import droneIcon from './Icons/drone.svg';
-// import artilleryIcon from './Icons/artillery.svg';
-// import arrestIcon from './Icons/arrest.svg';
-// import disruptedIcon from './Icons/disrupted.svg';
-// import protestIcon from './Icons/protest.svg';
-// import nonStateActorIcon from './Icons/non_state_actor.svg';
-// import explosiveIcon from './Icons/explosive.svg';
-// import otherIcon from './Icons/other.svg';
-// import attackIcon from './Icons/attack.svg';
-// import grenadeIcon from './Icons/grenade.svg';
-// import groupIcon from './Icons/group.svg';
-// import destructionIcon from './Icons/destruction.svg';
-// import abductionIcon from './Icons/abduction.svg';
-// import regainsTerritoryIcon from './Icons/regains_territory.svg';
-// import agreementIcon from './Icons/agreement.svg';
-// import mobViolenceIcon from './Icons/mob_violence.svg';
-// import nonViolentIcon from './Icons/non_violent.svg';
-// import armedClashIcon from './Icons/armed_clash.svg';
-
 const MapWithGeofencing = () => {
   const [markers, setMarkers] = useState([]);
   const [geojsonData, setGeojsonData] = useState(null);
