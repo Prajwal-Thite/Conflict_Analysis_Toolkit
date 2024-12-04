@@ -31,12 +31,26 @@ const MapWithGeofencing = () => {
       .then((data) => setGeojsonData(data));
   }, []);
 
+  // Fetch events data
+  const fetchData = async () => {
+    try {
+      // Try local path first
+      const response = await fetch('/complete_dataset.json');
+      if (!response.ok) {
+        // If local fails, try GitHub Pages URL
+        const ghResponse = await fetch('https://github.com/Prajwal-Thite/Conflict_Analysis_Toolkit/blob/master/public/complete_dataset.json');
+        return await ghResponse.json();
+      }
+      return await response.json();
+    } catch (error) {
+      console.log('Error loading data:', error);
+    }
+  };
+
   useEffect(() => {
     if (geojsonData) {    
-      fetch('/complete_dataset.json')
-        .then((response) => response.json())
-        .then((jsonData) => {
-          // Get first 100 points from the dataset
+      fetchData().then((jsonData) => {
+          // Get n points from the dataset
           const first100Events = jsonData.slice(0, 5000);
           const points = first100Events.map(event => ({
             lat: event.latitude,
