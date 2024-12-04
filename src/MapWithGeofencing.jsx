@@ -38,7 +38,7 @@ const MapWithGeofencing = () => {
       const response = await fetch('/complete_dataset.json');
       if (!response.ok) {
         // If local fails, try GitHub Pages URL
-        const ghResponse = await fetch('https://github.com/Prajwal-Thite/Conflict_Analysis_Toolkit/blob/master/public/complete_dataset.json');
+        const ghResponse = await fetch('https://github.com/Prajwal-Thite/Conflict_Analysis_Toolkit/complete_dataset.json');
         return await ghResponse.json();
       }
       return await response.json();
