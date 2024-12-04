@@ -59,7 +59,7 @@ const MapWithGeofencing = () => {
   const fetchData = async () => {
     try {
       // Try local path first
-      const response = await fetch('/complete_dataset.json');
+      const response = await fetch(`${process.env.PUBLIC_URL}/complete_dataset.json`);
       if (!response.ok) {
         // If local fails, try GitHub Pages URL
         const ghResponse = await fetch('https://prajwal-thite.github.io/Conflict_Analysis_Toolkit/complete_dataset.json');
@@ -74,6 +74,7 @@ const MapWithGeofencing = () => {
   useEffect(() => {
     if (geojsonData) {    
       fetchData().then((jsonData) => {
+        if (jsonData && Array.isArray(jsonData)) {
           // Get n points from the dataset
           const first100Events = jsonData.slice(0, 5000);
           const points = first100Events.map(event => ({
@@ -102,6 +103,7 @@ const MapWithGeofencing = () => {
           setDateValue(0);
 
           setMarkers(points);
+        }
         });
       }    
   }, [geojsonData])
