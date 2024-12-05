@@ -23,6 +23,8 @@ const MapWithGeofencing = () => {
   const [dateValue, setDateValue] = useState(0);
   const [allDates, setAllDates] = useState([]);;
   const mapRef = useRef(null);
+  // filter the sub-events to display
+  const [selectedSubEventFilter, setSelectedSubEventFilter] = useState('all')
 
   // Fetch GeoJSON data
   useEffect(() => {
@@ -259,35 +261,103 @@ const MapWithGeofencing = () => {
     });
   };
 
+  // sybevent types box color
+
+  const getEventBackgroundColor = (eventType) => {
+    const colorMap = {
+      'Air/drone strike': '#FFE6E6',
+      'Arrests': '#E6FFE6',
+      'Disrupted weapons use': '#FFF0E6',
+      'Shelling/artillery/missile attack': '#FFE6FF',
+      'Armed clash': '#E6FFFF',
+      'Peaceful protest': '#E6F0FF',
+      'Non-state actor overtakes territory': '#F0E6FF',
+      'Attack': '#FFE6F0',
+      'Remote explosive/landmine/IED': '#F0FFE6',
+      'Other': '#F5F5F5',
+      'Grenade': '#FFE6B3',
+      'Change to group/activity': '#B3E6FF',
+      'Looting/property destruction': '#FFB3E6',
+      'Abduction/forced disappearance': '#E6B3FF',
+      'Government regains territory': '#B3FFE6',
+      'Agreement': '#E6FFB3',
+      'Mob violence': '#FFE6CC',
+      'Non-violent transfer of territory': '#CCE6FF'
+    };
+    return colorMap[eventType] || '#F5F5F5'; // default color for unmapped types
+  };
+
   return (
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       <div style={{ padding: '10px', background: '#f0f0f0' }}>
-        <button onClick={toggleDraw}>
-          {drawEnabled ? 'Disable' : 'Enable'} Rectangle Select
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button 
+            onClick={toggleDraw}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '20px',
+              border: '1px solid #e1e4e8',
+              background: 'white',
+              color: '#24292e',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}
+          >
+            {drawEnabled ? 'Disable' : 'Enable'} Rectangle Select
+          </button>
 
-        <button 
-          onClick={() => setDisplayMode(prev => prev === 'events' ? 'fatalities' : 'events')} 
-          style={{ marginLeft: '10px' }}
-        >
-          Show: {displayMode === 'events' ? 'Events' : 'Fatalities'}
-        </button>
-        <button 
-          onClick={() => setShowDateSlider(!showDateSlider)}
-          style={{ marginLeft: '10px' }}
-        >
-          {showDateSlider ? 'Hide Timeline' : 'Show Timeline'}
-        </button>
+          <button
+            onClick={() => setDisplayMode(prev => prev === 'events' ? 'fatalities' : 'events')}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '20px',
+              border: '1px solid #e1e4e8',
+              background: 'white',
+              color: '#24292e',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}
+          >
+            Show: {displayMode === 'events' ? 'Events' : 'Fatalities'}
+          </button>
+
+          <button
+            onClick={() => setShowDateSlider(!showDateSlider)}
+            style={{
+              padding: '8px 16px',
+              borderRadius: '20px',
+              border: '1px solid #e1e4e8',
+              background: 'white',
+              color: '#24292e',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              fontSize: '14px',
+              fontWeight: '500'
+            }}
+          >
+            {showDateSlider ? 'Hide Timeline' : 'Show Timeline'}
+          </button>
+        </div>
 
         {showDateSlider && (
           <div style={{
             marginTop: '10px',
             padding: '15px',
             backgroundColor: 'white',
-            borderRadius: '5px',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            borderRadius: '20px',
+            border: '1px solid #e1e4e8',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
           }}>
-            <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+            <div style={{ 
+              textAlign: 'center', 
+              marginBottom: '8px',
+              fontSize: '14px',
+              color: '#24292e'
+            }}>
               {allDates[dateValue] && formatDate(allDates[dateValue])}
             </div>
             <input
@@ -298,11 +368,9 @@ const MapWithGeofencing = () => {
               onChange={(e) => setDateValue(parseInt(e.target.value))}
               style={{
                 width: '100%',
-                height: '20px',
-                background: '#ddd',
-                outline: 'none',
-                opacity: '0.7',
-                transition: 'opacity .2s'
+                height: '4px',
+                borderRadius: '2px',
+                cursor: 'pointer'
               }}
             />
           </div>
@@ -564,32 +632,80 @@ const MapWithGeofencing = () => {
         position: 'absolute',
         bottom: '20px',
         left: '20px',
-        backgroundColor: 'white',
+        backgroundColor: 'rgba(255, 255, 255, 0.90)',
         // backgroundColor: '#202020',
-        // color: 'white',
+        // color: 'white',        
         padding: '15px',
         borderRadius: '15px',
-        boxShadow: '0 0 10px rgba(0,0,0,0.2)',
-        maxHeight: '300px',
+        boxShadow: '0 0 10px rgba(0,0,0,0.2)',        
+        height: 'calc(100vh - 500px)',
+        width: '20%',
         overflowY: 'auto',
         zIndex: 1000,
-        display: selectedMarkers.length > 0 ? 'block' : 'none'
+        display: selectedMarkers.length > 0 ? 'block' : 'none',
       }}>
         <h3 style={{ 
           borderBottom: '2px solid #eee',
           paddingBottom: '10px',
           marginBottom: '15px'
-        }}>Selected Events ({selectedMarkers.length})</h3>
-        {selectedMarkers.map((marker, index) => (
+        }}>  Selected Events ({selectedSubEventFilter === 'all' 
+          ? selectedMarkers.length 
+          : selectedMarkers.filter(marker => marker.subEventType === selectedSubEventFilter).length})
+      </h3>
+
+      <select 
+          value={selectedSubEventFilter}
+          onChange={(e) => setSelectedSubEventFilter(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '12px',
+            marginBottom: '20px',
+            borderRadius: '10px',
+            border: '1px solid #ddd',
+            fontSize: '1em',
+            cursor: 'pointer',
+            backgroundColor: '#f8f9fa',
+            // transition: 'all 0.3s ease'
+          }}
+        >
+          <option value="all">All Event Types</option>
+          {[...new Set(selectedMarkers.map(m => m.subEventType))].map(type => (
+            <option key={type} value={type}>{type}</option>
+          ))}
+        </select>
+      {selectedMarkers
+        .filter(marker => selectedSubEventFilter === 'all' || marker.subEventType === selectedSubEventFilter)
+        .map((marker, index) => (
           <div key={index} style={{ 
-            marginBottom: '10px', 
-            borderBottom: '1px solid #eee', 
-            paddingBottom: '5px'
+            marginBottom: '15px',
+            padding: '15px',
+            borderRadius: '12px',
+            backgroundColor: getEventBackgroundColor(marker.subEventType),
+            boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+            // transition: 'transform 0.2s ease',
+            // ':hover': {
+            //   transform: 'translateY(-2px)'
+            // }
           }}>
-            <p><strong>Type:</strong> {marker.subEventType}</p>
-            <p><strong>Date:</strong> {marker.event_date}</p>
-            <p><strong>Fatalities:</strong> {marker.fatalities}</p>
-            <p><strong>Notes:</strong> {marker.notes}</p>
+        <p style={{
+          fontSize: '1.1em',
+          fontWeight: 'bold',
+          marginBottom: '8px',
+          color: '#2c3e50'
+        }}><strong>Type:</strong> {marker.subEventType}</p>
+        <p style={{
+          margin: '10px 0',
+          color: '#34495e'
+        }}><strong>Date:</strong> {marker.event_date}</p>
+        <p style={{
+          margin: '10px 0',
+          color: '#34495e'
+        }}><strong>Fatalities:</strong> {marker.fatalities}</p>
+        <p style={{
+          margin: '10px 0',
+          color: '#34495e',
+          lineHeight: '1.4'
+        }}><strong>Notes:</strong> {marker.notes}</p>
           </div>
         ))}
       </div>      
