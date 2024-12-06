@@ -25,6 +25,10 @@ const MapWithGeofencing = () => {
   const mapRef = useRef(null);
   // filter the sub-events to display
   const [selectedSubEventFilter, setSelectedSubEventFilter] = useState('all')
+  //marker reference on map
+  const [map, setMap] = useState(null);
+  //filterr the fatality type to display
+  const [selectedFatalityFilter, setSelectedFatalityFilter] = useState('all');
 
   // Fetch GeoJSON data
   useEffect(() => {
@@ -201,13 +205,6 @@ const MapWithGeofencing = () => {
   };
 
   //Icons
-
-  const getBasePath = () => {
-    return process.env.NODE_ENV === 'production' 
-      ? '/Conflict_Analysis_Toolkit' 
-      : '';
-  };
-
   const getEventIcon = (subEventType, color) => {
     const iconMapping = {
       'Air/drone strike': `${process.env.PUBLIC_URL}/Icons/drone.svg`,
@@ -285,6 +282,16 @@ const MapWithGeofencing = () => {
       'Non-violent transfer of territory': '#CCE6FF'
     };
     return colorMap[eventType] || '#F5F5F5'; // default color for unmapped types
+  }; 
+
+  // function to handle clicking on events
+  const handleEventClick = (lat, lng) => {    
+    if (map) {
+      map.flyTo([lat, lng], 12, {
+        duration: 1.5,
+        animate: true
+      });
+    }
   };
 
   return (
@@ -382,7 +389,11 @@ const MapWithGeofencing = () => {
         center={[48.5, 37.5]}
         zoom={5}
         style={{ flex: 1 }}
-        whenCreated={(mapInstance) => (mapRef.current = mapInstance)}
+        // for event click feature
+        whenReady={(map) => {
+          setMap(map.target);
+          mapRef.current = map.target;
+        }}
         maxBounds={[[-90, -180], [90, 180]]}
         minZoom={2}
       >
@@ -420,8 +431,15 @@ const MapWithGeofencing = () => {
               <button 
                 onClick={() => setIsMinimized(!isMinimized)}
                 style={{
-                  padding: '5px 10px',
-                  cursor: 'pointer'
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  border: '1px solid #e1e4e8',
+                  background: 'white',
+                  color: '#24292e',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  fontSize: '14px',
+                  fontWeight: '500'
                 }}
               >
                 {isMinimized ? 'Maximize' : 'Minimize'}
@@ -429,8 +447,15 @@ const MapWithGeofencing = () => {
               <button 
                 onClick={() => setSelectedMarkers([])}
                 style={{
-                  padding: '5px 10px',
-                  cursor: 'pointer'
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  border: '1px solid #e1e4e8',
+                  background: 'white',
+                  color: '#24292e',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  fontSize: '14px',
+                  fontWeight: '500'
                 }}
               >
                 Close
@@ -468,7 +493,7 @@ const MapWithGeofencing = () => {
 
       {/* Marker Clustering */}
     {displayMode === 'events' ? (
-      <MarkerClusterGroup key={'events-${dateValue}'}
+      <MarkerClusterGroup key={`events-${dateValue}`}
         {...clusterOptions}                          
       >
         {/* Bitmarkers */}
@@ -585,7 +610,7 @@ const MapWithGeofencing = () => {
         ))}
       </MarkerClusterGroup>
     ):(
-      <MarkerClusterGroup key={'fatalities-${dateValue}'}
+      <MarkerClusterGroup key={`fatalities-${dateValue}`}
           {...clusterOptions2}
         >
           {getFilteredMarkers().map((marker, index) => (
@@ -648,40 +673,109 @@ const MapWithGeofencing = () => {
           borderBottom: '2px solid #eee',
           paddingBottom: '10px',
           marginBottom: '15px'
-        }}>  Selected Events ({selectedSubEventFilter === 'all' 
-          ? selectedMarkers.length 
-          : selectedMarkers.filter(marker => marker.subEventType === selectedSubEventFilter).length})
+        }}> 
+          Selected Events ({
+            selectedMarkers.filter(marker => {
+              const eventTypeMatch = selectedSubEventFilter === 'all' || 
+                marker.subEventType === selectedSubEventFilter;
+              const fatalityMatch = selectedFatalityFilter === 'all' || 
+                (selectedFatalityFilter === 'low' && marker.fatalities <= 5) ||
+                (selectedFatalityFilter === 'medium' && marker.fatalities > 5 && marker.fatalities <= 20) ||
+                (selectedFatalityFilter === 'high' && marker.fatalities > 20);
+              return eventTypeMatch && fatalityMatch;
+            }).length
+          })
       </h3>
+      
+      {/* subevent filter */}
+      <div style={{
+        display: 'flex',
+        gap: '10px',
+        marginBottom: '20px'
+      }}>
+        {/* First dropdown */}
+        <div style={{ flex: 1 }}>
+          <label style={{
+            display: 'block',
+            marginBottom: '5px',
+            fontSize: '0.9em',
+            color: '#666'
+          }}>
+            Event Type
+          </label>
+          <select
+            value={selectedSubEventFilter}
+            onChange={(e) => setSelectedSubEventFilter(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '8px',
+              borderRadius: '8px',
+              border: '1px solid #ddd',
+              fontSize: '0.9em',
+              cursor: 'pointer',
+              backgroundColor: '#f8f9fa',
+            }}
+          >
+            <option value="all">All Event Types</option>
+            {[...new Set(selectedMarkers.map(m => m.subEventType))].map(type => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+        </div>
 
-      <select 
-          value={selectedSubEventFilter}
-          onChange={(e) => setSelectedSubEventFilter(e.target.value)}
-          style={{
-            width: '100%',
-            padding: '12px',
-            marginBottom: '20px',
-            borderRadius: '10px',
-            border: '1px solid #ddd',
-            fontSize: '1em',
-            cursor: 'pointer',
-            backgroundColor: '#f8f9fa',
-            // transition: 'all 0.3s ease'
-          }}
-        >
-          <option value="all">All Event Types</option>
-          {[...new Set(selectedMarkers.map(m => m.subEventType))].map(type => (
-            <option key={type} value={type}>{type}</option>
-          ))}
-        </select>
+        {/* Second dropdown */}
+        <div style={{ flex: 1 }}>
+          <label style={{
+            display: 'block',
+            marginBottom: '5px',
+            fontSize: '0.9em',
+            color: '#666'
+          }}>
+            Fatality Level
+          </label>
+          <select
+            value={selectedFatalityFilter}
+            onChange={(e) => setSelectedFatalityFilter(e.target.value)}
+            style={{
+              width: '100%',
+              padding: '8px',
+              borderRadius: '8px',
+              border: '1px solid #ddd',
+              fontSize: '0.9em',
+              cursor: 'pointer',
+              backgroundColor: '#f8f9fa',
+            }}
+          >
+            <option value="all">All Fatality Levels</option>
+            <option value="low">Low</option>
+            <option value="medium">Medium</option>
+            <option value="high">High</option>
+          </select>
+        </div>
+      </div>
       {selectedMarkers
-        .filter(marker => selectedSubEventFilter === 'all' || marker.subEventType === selectedSubEventFilter)
+        .filter(marker => {
+          // Event type filter
+          const eventTypeMatch = selectedSubEventFilter === 'all' || 
+            marker.subEventType === selectedSubEventFilter;
+          
+          // Fatality filter
+          const fatalityMatch = selectedFatalityFilter === 'all' || 
+          getFatalityCategory(marker.fatalities).toLowerCase() === selectedFatalityFilter.toLowerCase();
+          
+          return eventTypeMatch && fatalityMatch;
+        })
         .map((marker, index) => (
-          <div key={index} style={{ 
+          <div 
+            key={index}
+            onClick={() => handleEventClick(marker.lat, marker.lng)}
+            style={{ 
             marginBottom: '15px',
             padding: '15px',
             borderRadius: '12px',
             backgroundColor: getEventBackgroundColor(marker.subEventType),
             boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
+            cursor: 'pointer',
             // transition: 'transform 0.2s ease',
             // ':hover': {
             //   transform: 'translateY(-2px)'

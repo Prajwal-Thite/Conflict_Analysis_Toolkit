@@ -7,6 +7,8 @@ const ParallelCoordinatesPlot = ({ data }) => {
   useEffect(() => {
     if (!data || data.length === 0) return;
 
+    const chart = chartRef.current;
+
     console.log("Sample data record:", data[0]);
     console.log("All available fields:", Object.keys(data[0])); 
 
@@ -58,7 +60,7 @@ const ParallelCoordinatesPlot = ({ data }) => {
       .padding(0.5);
 
     dimensions.forEach((dimension) => {
-      const values = data.map((d) => d[dimension]);
+      const values = data.map((d) => d[dimension]|| "N/A");
       if (typeof values[0] === "string") {
         yScales[dimension] = d3
           .scalePoint()
@@ -98,7 +100,7 @@ const ParallelCoordinatesPlot = ({ data }) => {
       .append("path")
       .attr("class", "line")
       .attr("d", (d) =>
-        line(dimensions.map((dim) => [xScale(dim), yScales[dim](d[dim])])))
+        line(dimensions.map((dim) => [xScale(dim), yScales[dim](d[dim] || "N/A")])))
       .style("fill", "none")
       .style("stroke", d => colorScale(d.event_type))
       .style("stroke-width", "1.5px")
@@ -220,7 +222,7 @@ const ParallelCoordinatesPlot = ({ data }) => {
       .text(d => axisLabels[d]);      
 
     return () => {
-      d3.select(chartRef.current).selectAll("*").remove();
+      d3.select(chart).selectAll("*").remove();
       tooltip.remove();
     };
 
