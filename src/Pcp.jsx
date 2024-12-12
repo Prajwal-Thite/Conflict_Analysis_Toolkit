@@ -354,10 +354,10 @@ const ParallelCoordinatesPlot = ({ data }) => {
 
     
     const axisLabels = {
-        actor1: "ACTOR 1",
-        actor2: "ACTOR 2",
+        inter1: "ACTOR 1",
+        inter2: "ACTOR 2",
         fatalities: "FATATALITIES",
-        interaction: "INTERACTION"
+        subEventType: "SUB EVENT",
       };
 
     axes
