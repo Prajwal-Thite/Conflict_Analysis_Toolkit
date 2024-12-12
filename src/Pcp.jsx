@@ -12,11 +12,11 @@ const ParallelCoordinatesPlot = ({ data }) => {
     console.log("Sample data record:", data[0]);
     console.log("All available fields:", Object.keys(data[0])); 
 
-    const dimensions = ["actor1", "fatalities", "interaction", "actor2"];
+    const dimensions = ["subEventType", "inter1", "inter2", "fatalities"];
 
     const margin = { top: 80, right: 50, bottom: 10, left: 50 };
-    const width = 1400 - margin.left - margin.right;
-    const height = 600 - margin.top - margin.bottom;
+    const width = 1200 - margin.left - margin.right;
+    const height = 500 - margin.top - margin.bottom;
 
     d3.select(chartRef.current).selectAll("*").remove();
 
@@ -57,20 +57,102 @@ const ParallelCoordinatesPlot = ({ data }) => {
       .scalePoint()
       .domain(dimensions)
       .range([0, width])
-      .padding(0.5);
+      .padding(0.9);
 
     dimensions.forEach((dimension) => {
-      const values = data.map((d) => d[dimension]|| "N/A");
-      if (typeof values[0] === "string") {
+      const values = data.map((d) => {
+        const val = d[dimension];
+        return (val === null || val === undefined) ? 0 : val;
+      });
+
+      if (dimension === "subEventType") {
+        // Group similar event types together
+        const uniqueSubEvents = [...new Set(values)];
+        console.log("Unique subEventTypes:", uniqueSubEvents);
+        const sortedValues = [...new Set(values)].sort((a, b) => {    
+ 
+          // bottom
+
+          if (a.includes('regains territory') && !b.includes('regains territory')) return -1;
+          if (!a.includes('regains territory') && b.includes('regains territory')) return 1;
+
+          if (a.includes('Agreement') && !b.includes('Agreement')) return -1;
+          if (!a.includes('Agreement') && b.includes('Agreement')) return 1;
+
+          if (a.includes('Arrests') && !b.includes('Arrests')) return -1;
+          if (!a.includes('Arrests') && b.includes('Arrests')) return 1;
+
+          if (a.includes('Disrupted weapons') && !b.includes('Disrupted weapons')) return -1;
+          if (!a.includes('Disrupted weapons') && b.includes('Disrupted weapons')) return 1;
+
+          if (a.includes('Change to group') && !b.includes('Change to group')) return -1;
+          if (!a.includes('Change to group') && b.includes('Change to group')) return 1;
+          
+          if (a.includes('Armed clash') && !b.includes('Armed clash')) return -1;
+          if (!a.includes('Armed clash') && b.includes('Armed clash')) return 1;
+          
+          // middle
+
+          if (a.includes('Looting') && !b.includes('Looting')) return -1;
+          if (!a.includes('Looting') && b.includes('Looting')) return 1;
+
+          if (a.includes('Other') && !b.includes('Other')) return -1;
+          if (!a.includes('Other') && b.includes('Other')) return 1;
+
+          if (a.includes('Attack') && !b.includes('Attack')) return -1;
+          if (!a.includes('Attack') && b.includes('Attack')) return 1;
+
+          if (a.includes('Remote explosive') && !b.includes('Remote explosive')) return -1;
+          if (!a.includes('Remote explosive') && b.includes('Remote explosive')) return 1;
+
+          if (a.includes('Grenade') && !b.includes('Grenade')) return -1;
+          if (!a.includes('Grenade') && b.includes('Grenade')) return 1;
+
+          if (a.includes('Mob violence') && !b.includes('Mob violence')) return -1;
+          if (!a.includes('Mob violence') && b.includes('Mob violence')) return 1;
+
+          //top
+
+          if (a.includes('Air/drone strike') && !b.includes('Air/drone strike')) return -1;
+          if (!a.includes('Air/drone strike') && b.includes('Air/drone strike')) return 1;
+
+          if (a.includes('Shelling/artillery/missile attack') && !b.includes('Shelling/artillery/missile attack')) return -1;
+          if (!a.includes('Shelling/artillery/missile attack') && b.includes('Shelling/artillery/missile attack')) return 1;
+
+          if (a.includes('Abduction') && !b.includes('Abduction')) return -1;
+          if (!a.includes('Abduction') && b.includes('Abduction')) return 1;
+
+          if (a.includes('Non') && !b.includes('Non')) return -1;
+          if (!a.includes('Non') && b.includes('Non')) return 1;
+
+          if (a.includes('transfer of territory') && !b.includes('transfer of territory')) return -1;
+          if (!a.includes('transfer of territory') && b.includes('transfer of territory')) return 1;
+
+          if (a.includes('Peaceful protest') && !b.includes('Peaceful protest')) return -1;
+          if (!a.includes('Peaceful protest') && b.includes('Peaceful protest')) return 1;    
+
+          
+          return a.localeCompare(b);
+        });
+
         yScales[dimension] = d3
           .scalePoint()
-          .domain([...new Set(values)])
+          .domain(sortedValues)
           .range([height, 0]);
       } else {
-        yScales[dimension] = d3
-          .scaleLinear()
-          .domain(d3.extent(values))
-          .range([height, 0]);
+        // Keep existing scale logic for other dimensions
+        if (typeof values[0] === "string") {
+          yScales[dimension] = d3
+            .scalePoint()
+            .domain([...new Set(values)])
+            .range([height, 0]);
+        } else {
+          const extent = d3.extent(values);
+          yScales[dimension] = d3
+            .scaleLinear()
+            .domain([Math.min(0, extent[0]), extent[1]])
+            .range([height, 0]);
+        }
       }
     });
 
@@ -91,16 +173,84 @@ const ParallelCoordinatesPlot = ({ data }) => {
     //     '#17becf',  // cyan
     //     '#FFD700',  // golden
     //   ]);
-
-    const line = d3.line();    
+    
+    const line = d3.line()
+    .x(d => d[0])
+    .y(d => d[1])
+    .curve(d3.curveNatural);  
     svg
-      .selectAll(".line")
-      .data(data)
-      .enter()
-      .append("path")
-      .attr("class", "line")
-      .attr("d", (d) =>
-        line(dimensions.map((dim) => [xScale(dim), yScales[dim](d[dim] || "N/A")])))
+    .selectAll(".line")
+    .data(data)
+    .enter()
+    .append("path")
+    .attr("class", "line")
+    .attr("d", (d) => {
+      const points = dimensions.flatMap((dim, i) => {
+        const x = xScale(dim);
+        const val = d[dim] === null || d[dim] === undefined ? 0 : d[dim];
+        const y = yScales[dim](val);
+  
+        if (i === 0) {
+          // First to second axis bundling
+          const nextDim = dimensions[1];
+          const nextX = xScale(nextDim);
+          const nextVal = d[nextDim] === null || d[nextDim] === undefined ? 0 : d[nextDim];
+          const nextY = yScales[nextDim](nextVal);
+          
+          let midY;
+          if (nextY < height / 3) {
+            midY = height / 6;
+          } else if (nextY < 2 * height / 3) {
+            midY = height / 2;
+          } else {
+            midY = 5 * height / 6;
+          }
+          
+          const midX = (x + nextX) / 2;
+          return [[x, y], [midX, midY]];
+        } else if (i === 1) {
+          // Second to third axis bundling
+          const nextDim = dimensions[2];
+          const nextX = xScale(nextDim);
+          const nextVal = d[nextDim] === null || d[nextDim] === undefined ? 0 : d[nextDim];
+          const nextY = yScales[nextDim](nextVal);
+          
+          let midY;
+          if (nextY < height / 3) {
+            midY = height / 7;
+          } else if (nextY < 2 * height / 3) {
+            midY = height / 2;
+          } else {
+            midY = 5 * height / 6;
+          }
+          
+          const midX = (x + nextX) / 2;
+          return [[x, y], [midX, midY]];
+        } else if (i === 2) {
+          // Third to fourth axis bundling based on fatalities
+          const nextDim = dimensions[3];
+          const nextX = xScale(nextDim);
+          const fatalities = d.fatalities || 0;
+          
+          let midY;
+          if (fatalities > 30) {  // High fatalities
+            midY = height / 6;
+          } else if (fatalities > 10) {  // Medium fatalities
+            midY = height / 2;
+          } else {  // Low fatalities
+            midY = 5 * height / 6;
+          }
+          
+          const midX = (x + nextX) / 2;
+          return [[x, y], [midX, midY]];
+        }
+  
+        return [[x, y]];
+      });
+  
+      return line(points);
+    })
+
       .style("fill", "none")
       .style("stroke", d => colorScale(d.event_type))
       .style("stroke-width", "1.5px")
@@ -126,8 +276,7 @@ const ParallelCoordinatesPlot = ({ data }) => {
             <div style="font-size: 14px; line-height: 1.5;">
               <h3 style="margin: 0 0 10px 0; color: #333;">Event Details</h3>
               <p><strong>Actor 1:</strong> ${d.actor1}</p>
-              <p><strong>Actor 2:</strong> ${d.actor2}</p>
-              <p><strong>Interaction:</strong> ${d.interaction}</p>
+              <p><strong>Actor 2:</strong> ${d.actor2}</p>              
               <p><strong>Sub Event Type:</strong> ${d.subEventType}</p>
               <p><strong>Fatalities:</strong> ${d.fatalities}</p>
               <p><strong>Notes:</strong> ${d.notes}</p>
@@ -167,7 +316,7 @@ const ParallelCoordinatesPlot = ({ data }) => {
     // legend
     const legend = svg.append("g")
       .attr("class", "legend")
-      .attr("transform", `translate(${width - 120}, ${150})`)
+      .attr("transform", `translate(${width - 120}, ${100})`)
 
 
     const legendItems = legend.selectAll(".legend-item")

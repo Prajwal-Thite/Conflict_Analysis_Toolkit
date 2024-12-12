@@ -6,6 +6,7 @@ import L from 'leaflet';
 import 'leaflet-draw';
 
 import ParallelCoordinatesPlot from './Pcp';
+import PixelVisualization from './PixelVisualisation';
 
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
@@ -29,6 +30,10 @@ const MapWithGeofencing = () => {
   const [map, setMap] = useState(null);
   //filterr the fatality type to display
   const [selectedFatalityFilter, setSelectedFatalityFilter] = useState('all');
+  // pixel visualsation state
+  const [showPixelPopup, setShowPixelPopup] = useState(false);
+  // minimize
+  const [isPixelMinimized, setIsPixelMinimized] = useState(false);
 
   // Fetch GeoJSON data
   useEffect(() => {
@@ -41,7 +46,7 @@ const MapWithGeofencing = () => {
   const fetchData = async () => {
     try {
       // Try local path first
-      const response = await fetch(`${process.env.PUBLIC_URL}/complete_dataset.json`);
+      const response = await fetch(`${process.env.PUBLIC_URL}/complete_dataset_new.json`);
       if (!response.ok) {
         // If local fails, try GitHub Pages URL
         const ghResponse = await fetch('https://prajwal-thite.github.io/Conflict_Analysis_Toolkit/complete_dataset.json');
@@ -76,6 +81,7 @@ const MapWithGeofencing = () => {
             inter2: event.inter2,
             interaction: event.interaction,
             event_date: event.event_date,
+            sub_event_type_code: event.sub_event_type_code,
           }));          
 
           // Get unique dates and sort them chronologically
@@ -404,15 +410,18 @@ const MapWithGeofencing = () => {
 
         {/* popup window for pcp */}
 
-        {selectedMarkers.length > 0 && (
+        {selectedMarkers.length > 0 && !showPixelPopup && (
           <div style={{
             position: 'fixed',
             ...(isMinimized ? {
               bottom: '20px',
               right: '20px',
               transform: 'none',
-              width: '200px',
-              height: '40px',
+              width: '320px',
+              height: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             } : {
               top: '50%',
               left: '50%',
@@ -427,6 +436,7 @@ const MapWithGeofencing = () => {
             zIndex: 2000,
             transition: 'all 0.3s ease'
           }}>
+            {/* pop up window */}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
               <button 
                 onClick={() => setIsMinimized(!isMinimized)}
@@ -444,6 +454,25 @@ const MapWithGeofencing = () => {
               >
                 {isMinimized ? 'Maximize' : 'Minimize'}
               </button>
+              <button 
+                onClick={() => {
+                  setShowPixelPopup(true);
+                  setIsPixelMinimized(false);
+                }}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  border: '1px solid #e1e4e8',
+                  background: 'white',
+                  color: '#24292e',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+              >
+                {showPixelPopup ? 'Hide Pixel View' : 'Show Pixel View'}
+              </button>             
               <button 
                 onClick={() => setSelectedMarkers([])}
                 style={{
@@ -474,6 +503,88 @@ const MapWithGeofencing = () => {
             )}
           </div>
         )}
+        
+        {/* popup for pixel visualisation */}
+        {showPixelPopup && selectedMarkers.length > 0 && (
+          <div style={{
+            position: 'fixed',
+            ...(isPixelMinimized ? {
+              bottom: '20px',
+              right: '20px',
+              transform: 'none',
+              width: '320px', 
+              height: '20px', 
+              alignItems: 'center',
+              justifyContent: 'center',
+            } : {
+              top: '60%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '70%',
+              height: '40%',
+            }),
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '10px',
+            boxShadow: '0 0 20px rgba(0,0,0,0.3)',
+            zIndex: 2001,
+            transition: 'all 0.3s ease'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <button 
+              onClick={() => setIsPixelMinimized(!isPixelMinimized)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '20px',
+                border: '1px solid #e1e4e8',
+                background: 'white',
+                color: '#24292e',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                fontSize: '14px',
+                fontWeight: '500'
+              }}
+            >
+              {isPixelMinimized ? 'Maximize' : 'Minimize'}
+            </button>
+              <button 
+                onClick={() => {
+                  setShowPixelPopup(false);
+                  setIsMinimized(false);
+                }}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  border: '1px solid #e1e4e8',
+                  background: 'white',
+                  color: '#24292e',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+              >
+                Show PCP View
+              </button>
+              <button 
+                  onClick={() => {
+                    setShowPixelPopup(false);
+                    setSelectedMarkers([]); // This will close both visualizations
+                  }}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  border: '1px solid #e1e4e8',
+                  background: 'white',
+                  cursor: 'pointer'
+                }}
+              >
+                Close
+              </button>
+            </div>
+            {!isPixelMinimized && <PixelVisualization data={selectedMarkers} />}
+          </div>
+        )}        
 
         {/* Coloring the country regions */}
 
