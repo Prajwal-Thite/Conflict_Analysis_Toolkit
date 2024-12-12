@@ -188,9 +188,10 @@ const PixelVisualization = ({ data }) => {
       position: 'absolute',
       top: '50%',
       left: '50%',
-      transform: 'translate(-50%, -50%)'
+      transform: 'translate( -50%, -50%)',
+      pointerEvents: 'none'
     }}>
-      <svg ref={pixelRef} style={{ width: "auto", height: "auto" }} />
+      <svg ref={pixelRef} style={{ width: "auto", height: "auto", pointerEvents: 'auto' }} />
     </div>
   );
 };
