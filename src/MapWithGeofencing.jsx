@@ -46,7 +46,7 @@ const MapWithGeofencing = () => {
   const fetchData = async () => {
     try {
       // Try local path first
-      const response = await fetch(`${process.env.PUBLIC_URL}/complete_dataset_new.json`);
+      const response = await fetch(`${process.env.PUBLIC_URL}/complete_dataset.json`);
       if (!response.ok) {
         // If local fails, try GitHub Pages URL
         const ghResponse = await fetch('https://prajwal-thite.github.io/Conflict_Analysis_Toolkit/complete_dataset.json');
@@ -82,6 +82,7 @@ const MapWithGeofencing = () => {
             interaction: event.interaction,
             event_date: event.event_date,
             sub_event_type_code: event.sub_event_type_code,
+            iso: event.iso,
           }));          
 
           // Get unique dates and sort them chronologically

@@ -2,7 +2,55 @@ import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
 const PixelVisualization = ({ data }) => {
+  // Create filtered datasets
+  // console.log('Sample data point:', data[0]);
+  const ukraineData = data.filter(d => d.iso === 804);
+  const russiaData = data.filter(d => d.iso === 643);
+
+  // Create container style for all three visualizations
+  const containerStyle = {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: '20px',
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    pointerEvents: 'none'
+  };
+
+  return (
+    <div style={containerStyle}>
+      <div style={{ flex: 1, position: 'relative' }}>
+        <SinglePixelVisualization data={data} title="TOTAL FATALITIES" />
+      </div>
+      <div style={{ flex: 1, position: 'relative' }}>
+        <SinglePixelVisualization data={ukraineData} title="UKRAINE FATALITIES" />
+      </div>
+      <div style={{ flex: 1, position: 'relative' }}>
+        <SinglePixelVisualization data={russiaData} title="RUSSIA FATALITIES" />
+      </div>
+    </div>
+  );
+};
+
+const SinglePixelVisualization = ({ data, title }) => {
   const pixelRef = useRef(null);
+  const getColorScale = (title) => {
+    switch(title) {
+      case "TOTAL FATALITIES":
+        return d3.interpolateReds;
+      case "UKRAINE FATALITIES":
+        return d3.interpolateGreens;
+        // return (t) => d3.interpolate("#F5F5DC", "#FFBF00")(t);
+      case "RUSSIA FATALITIES":
+        return d3.interpolatePurples;
+      default:
+        return d3.interpolateReds;
+    }
+  };
 
   useEffect(() => {
     if (!data || data.length === 0) return;
@@ -19,17 +67,18 @@ const PixelVisualization = ({ data }) => {
     // Setup dimensions
     // Calculate pixel size
     const pixelSize = 35; // Fixed pixel size
-    const gridWidth = 5; // Fixed width
+    const gridWidth = 7; // Fixed width
     const gridHeight = Math.ceil(totalDays / gridWidth);  // Calculate required height
-    const margin = { top: 60, right: 100, bottom: 40, left: 100 };
+    const margin = { top: 60, right: 150, bottom: 40, left: 50 };
     const width = gridWidth * pixelSize;
     const height = gridHeight * pixelSize;    
 
 
     // Create SVG
     const svg = d3.select(pixelRef.current)
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", height + margin.top + margin.bottom)
+      .attr("width", "100%")
+      .attr("height", "100%")
+      .attr("viewBox", `0 0 ${width + margin.left + margin.right} ${height + margin.top + margin.bottom}`)
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
@@ -63,7 +112,7 @@ const PixelVisualization = ({ data }) => {
 
     const colorScale = d3.scaleSequential()
       .domain([0, d3.max(timelineData, d => d.fatalities)])
-      .interpolator(d3.interpolateReds);
+      .interpolator(getColorScale(title));
 
 
     // Create pixels
@@ -122,7 +171,7 @@ const PixelVisualization = ({ data }) => {
       .attr("text-anchor", "middle")
       .style("font-size", "16px")
       .style("font-weight", "bold")
-      .text("FATALITY-TIMELINE");
+      .text(title);
 
     // Create legend
     const legendWidth = 20;
@@ -131,7 +180,7 @@ const PixelVisualization = ({ data }) => {
     // Create gradient for legend
     const defs = svg.append("defs");
     const linearGradient = defs.append("linearGradient")
-    .attr("id", "legend-gradient")
+    .attr("id", `legend-gradient-${title.replace(/\s+/g, '')}`) // Unique ID for each visualization
     .attr("x1", "0%")
     .attr("x2", "0%")
     .attr("y1", "100%")
@@ -153,7 +202,7 @@ const PixelVisualization = ({ data }) => {
     legend.append("rect")
     .attr("width", legendWidth)
     .attr("height", legendHeight)
-    .style("fill", "url(#legend-gradient)");
+    .style("fill", `url(#legend-gradient-${title.replace(/\s+/g, '')})`);
 
     // Add legend axis
     const legendScale = d3.scaleLinear()
@@ -176,7 +225,7 @@ const PixelVisualization = ({ data }) => {
     .style("font-size", "12px")
     .text("Fatalities");
 
-  }, [data]);
+  }, [data,title]);
 
   return (
     <div style={{ 
@@ -185,10 +234,6 @@ const PixelVisualization = ({ data }) => {
       alignItems: 'center', 
       width: '100%', 
       height: '100%',
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate( -50%, -50%)',
       pointerEvents: 'none'
     }}>
       <svg ref={pixelRef} style={{ width: "auto", height: "auto", pointerEvents: 'auto' }} />
