@@ -7,6 +7,7 @@ import 'leaflet-draw';
 
 import ParallelCoordinatesPlot from './Pcp';
 import PixelVisualization from './PixelVisualisation';
+import WordCloud from './WordCloud';
 
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
@@ -32,8 +33,10 @@ const MapWithGeofencing = () => {
   const [selectedFatalityFilter, setSelectedFatalityFilter] = useState('all');
   // pixel visualsation state
   const [showPixelPopup, setShowPixelPopup] = useState(false);
-  // minimize
   const [isPixelMinimized, setIsPixelMinimized] = useState(false);
+  // word cloud
+  const [showWordCloud, setShowWordCloud] = useState(false);
+  const [isWordCloudMinimized, setIsWordCloudMinimized] = useState(false);
 
   // Fetch GeoJSON data
   useEffect(() => {
@@ -459,6 +462,9 @@ const MapWithGeofencing = () => {
                 onClick={() => {
                   setShowPixelPopup(true);
                   setIsPixelMinimized(false);
+                  setShowWordCloud(false);
+                  setIsWordCloudMinimized(false);
+                  setIsMinimized(false);
                 }}
                 style={{
                   padding: '8px 16px',
@@ -551,6 +557,9 @@ const MapWithGeofencing = () => {
               <button 
                 onClick={() => {
                   setShowPixelPopup(false);
+                  setShowWordCloud(false);
+                  setIsWordCloudMinimized(false);
+                  setIsPixelMinimized(false);
                   setIsMinimized(false);
                 }}
                 style={{
@@ -566,6 +575,28 @@ const MapWithGeofencing = () => {
                 }}
               >
                 Show PCP View
+              </button>
+              <button 
+                onClick={() => {
+                  setShowWordCloud(true);
+                  setIsWordCloudMinimized(false);
+                  setShowPixelPopup(false);
+                  setIsPixelMinimized(false);
+                  setIsMinimized(false);
+                }}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  border: '1px solid #e1e4e8',
+                  background: 'white',
+                  color: '#24292e',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+              >
+                Show Word Cloud
               </button>
               <button 
                   onClick={() => {
@@ -585,7 +616,80 @@ const MapWithGeofencing = () => {
             </div>
             {!isPixelMinimized && <PixelVisualization data={selectedMarkers} />}
           </div>
-        )}        
+        )} 
+
+        {showWordCloud && selectedMarkers.length > 0 && (
+          <div style={{
+            position: 'fixed',
+            ...(isWordCloudMinimized ? {
+              bottom: '20px',
+              right: '20px',
+              transform: 'none',
+              width: '320px',
+              height: '20px',
+              alignItems: 'center',
+              justifyContent: 'center',
+            } : {
+              top: '40%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '70%',
+              height: '40%',
+            }),
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '10px',
+            boxShadow: '0 0 20px rgba(0,0,0,0.3)',
+            zIndex: 2002,
+            transition: 'all 0.3s ease'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+              <button 
+                onClick={() => setIsWordCloudMinimized(!isWordCloudMinimized)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  border: '1px solid #e1e4e8',
+                  background: 'white',
+                  color: '#24292e',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+              >
+                {isWordCloudMinimized ? 'Maximize' : 'Minimize'}
+              </button>
+              <button 
+                onClick={() => setShowWordCloud(false)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  border: '1px solid #e1e4e8',
+                  background: 'white',
+                  color: '#24292e',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+              >
+                Close
+              </button>
+            </div>
+            {!isWordCloudMinimized && (
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'center', 
+                alignItems: 'center',
+                width: '100%',
+                height: '100%'
+              }}>
+                <WordCloud data={selectedMarkers.map(marker => marker.notes || '')} />
+              </div>
+            )}
+          </div>
+        )}       
 
         {/* Coloring the country regions */}
 
