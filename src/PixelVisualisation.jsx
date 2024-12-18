@@ -155,16 +155,15 @@ const SinglePixelVisualization = ({ data, title }) => {
           .attr("stroke-width", 2);
       })
       .on("mouseout", function() {
-        // Remove tooltip
         d3.selectAll(".pixel-tooltip").remove();
         
-        // Reset pixel style
+        // resetting the pixel style
         d3.select(this)
           .attr("stroke", "#fff")
           .attr("stroke-width", 0.5);
       });
 
-    // Add title
+    // title
     svg.append("text")
       .attr("x", width / 2)
       .attr("y", -40)
@@ -173,11 +172,10 @@ const SinglePixelVisualization = ({ data, title }) => {
       .style("font-weight", "bold")
       .text(title);
 
-    // Create legend
     const legendWidth = 20;
     const legendHeight = height;
 
-    // Create gradient for legend
+    // gradient for legend
     const defs = svg.append("defs");
     const linearGradient = defs.append("linearGradient")
     .attr("id", `legend-gradient-${title.replace(/\s+/g, '')}`) // Unique ID for each visualization
@@ -186,7 +184,6 @@ const SinglePixelVisualization = ({ data, title }) => {
     .attr("y1", "100%")
     .attr("y2", "0%");
 
-    // Add color stops
     const maxFatalities = d3.max(timelineData, d => d.fatalities);
     const colorStops = [0, 0.25, 0.5, 0.75, 1];
     colorStops.forEach(stop => {
@@ -195,7 +192,6 @@ const SinglePixelVisualization = ({ data, title }) => {
         .attr("stop-color", colorScale(stop * maxFatalities));
     });
 
-    // Add legend rectangle
     const legend = svg.append("g")
     .attr("transform", `translate(${width + 40}, 0)`);
 
@@ -203,8 +199,7 @@ const SinglePixelVisualization = ({ data, title }) => {
     .attr("width", legendWidth)
     .attr("height", legendHeight)
     .style("fill", `url(#legend-gradient-${title.replace(/\s+/g, '')})`);
-
-    // Add legend axis
+    
     const legendScale = d3.scaleLinear()
     .domain([0, maxFatalities])
     .range([legendHeight, 0]);
@@ -216,7 +211,6 @@ const SinglePixelVisualization = ({ data, title }) => {
     .attr("transform", `translate(${legendWidth}, 0)`)
     .call(legendAxis);
 
-    // Add legend title
     legend.append("text")
     .attr("transform", "rotate(90)")
     .attr("x", legendHeight / 2)

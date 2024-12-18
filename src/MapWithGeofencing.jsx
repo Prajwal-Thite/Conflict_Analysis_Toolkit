@@ -7,6 +7,7 @@ import 'leaflet-draw';
 
 import ParallelCoordinatesPlot from './Pcp';
 import PixelVisualization from './PixelVisualisation';
+import HeatmapVisualization from './HeatmapVisualization';
 import WordCloud from './WordCloud';
 
 import 'leaflet.markercluster/dist/MarkerCluster.css';
@@ -34,9 +35,10 @@ const MapWithGeofencing = () => {
   // pixel visualsation state
   const [showPixelPopup, setShowPixelPopup] = useState(false);
   const [isPixelMinimized, setIsPixelMinimized] = useState(false);
-  // word cloud
+  //heat map
+  const [showHeatmap, setShowHeatmap] = useState(false);
+  // wordcloud
   const [showWordCloud, setShowWordCloud] = useState(false);
-  const [isWordCloudMinimized, setIsWordCloudMinimized] = useState(false);
 
   // Fetch GeoJSON data
   useEffect(() => {
@@ -326,7 +328,11 @@ const MapWithGeofencing = () => {
           </button>
 
           <button
-            onClick={() => setDisplayMode(prev => prev === 'events' ? 'fatalities' : 'events')}
+            onClick={() => setDisplayMode(prev => {
+              if (prev === 'events') return 'fatalities';
+              if (prev === 'fatalities') return 'none';
+              return 'events';
+            })}
             style={{
               padding: '8px 16px',
               borderRadius: '20px',
@@ -339,7 +345,7 @@ const MapWithGeofencing = () => {
               fontWeight: '500'
             }}
           >
-            Show: {displayMode === 'events' ? 'Events' : 'Fatalities'}
+            Show: {displayMode === 'events' ? 'Events' : displayMode === 'fatalities' ? 'Fatalities' : 'None'}
           </button>
 
           <button
@@ -358,6 +364,23 @@ const MapWithGeofencing = () => {
           >
             {showDateSlider ? 'Hide Timeline' : 'Show Timeline'}
           </button>
+
+          <button
+          onClick={() => setShowHeatmap(!showHeatmap)}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '20px',
+            border: '1px solid #e1e4e8',
+            background: 'white',
+            color: '#24292e',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            fontSize: '14px',
+            fontWeight: '500'
+          }}
+        >
+          {showHeatmap ? 'Hide Heatmap' : 'Show Heatmap'}
+        </button>
         </div>
 
         {showDateSlider && (
@@ -462,8 +485,6 @@ const MapWithGeofencing = () => {
                 onClick={() => {
                   setShowPixelPopup(true);
                   setIsPixelMinimized(false);
-                  setShowWordCloud(false);
-                  setIsWordCloudMinimized(false);
                   setIsMinimized(false);
                 }}
                 style={{
@@ -479,6 +500,22 @@ const MapWithGeofencing = () => {
                 }}
               >
                 {showPixelPopup ? 'Hide Pixel View' : 'Show Pixel View'}
+              </button>
+              <button
+                onClick={() => setShowWordCloud(!showWordCloud)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  border: '1px solid #e1e4e8',
+                  background: 'white',
+                  color: '#24292e',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  fontSize: '14px',
+                  fontWeight: '500'
+                }}
+              >
+                {showWordCloud ? 'Hide Word Cloud' : 'Show Word Cloud'}
               </button>             
               <button 
                 onClick={() => setSelectedMarkers([])}
@@ -557,8 +594,6 @@ const MapWithGeofencing = () => {
               <button 
                 onClick={() => {
                   setShowPixelPopup(false);
-                  setShowWordCloud(false);
-                  setIsWordCloudMinimized(false);
                   setIsPixelMinimized(false);
                   setIsMinimized(false);
                 }}
@@ -576,14 +611,8 @@ const MapWithGeofencing = () => {
               >
                 Show PCP View
               </button>
-              <button 
-                onClick={() => {
-                  setShowWordCloud(true);
-                  setIsWordCloudMinimized(false);
-                  setShowPixelPopup(false);
-                  setIsPixelMinimized(false);
-                  setIsMinimized(false);
-                }}
+              <button
+                onClick={() => setShowWordCloud(!showWordCloud)}
                 style={{
                   padding: '8px 16px',
                   borderRadius: '20px',
@@ -596,7 +625,7 @@ const MapWithGeofencing = () => {
                   fontWeight: '500'
                 }}
               >
-                Show Word Cloud
+                {showWordCloud ? 'Hide Word Cloud' : 'Show Word Cloud'}
               </button>
               <button 
                   onClick={() => {
@@ -616,50 +645,30 @@ const MapWithGeofencing = () => {
             </div>
             {!isPixelMinimized && <PixelVisualization data={selectedMarkers} />}
           </div>
-        )} 
-
+        )}
+        
         {showWordCloud && selectedMarkers.length > 0 && (
           <div style={{
             position: 'fixed',
-            ...(isWordCloudMinimized ? {
-              bottom: '20px',
-              right: '20px',
-              transform: 'none',
-              width: '320px',
-              height: '20px',
-              alignItems: 'center',
-              justifyContent: 'center',
-            } : {
-              top: '40%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '70%',
-              height: '40%',
-            }),
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%',         
+            height: '80%',        
             backgroundColor: 'white',
             padding: '20px',
             borderRadius: '10px',
             boxShadow: '0 0 20px rgba(0,0,0,0.3)',
-            zIndex: 2002,
-            transition: 'all 0.3s ease'
+            zIndex: 9999,
+            overflow: 'hidden',   
+            display: 'flex',
+            flexDirection: 'column'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button 
-                onClick={() => setIsWordCloudMinimized(!isWordCloudMinimized)}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '20px',
-                  border: '1px solid #e1e4e8',
-                  background: 'white',
-                  color: '#24292e',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  fontSize: '14px',
-                  fontWeight: '500'
-                }}
-              >
-                {isWordCloudMinimized ? 'Maximize' : 'Minimize'}
-              </button>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'flex-end',
+              marginBottom: '10px'
+            }}>
               <button 
                 onClick={() => setShowWordCloud(false)}
                 style={{
@@ -667,29 +676,18 @@ const MapWithGeofencing = () => {
                   borderRadius: '20px',
                   border: '1px solid #e1e4e8',
                   background: 'white',
-                  color: '#24292e',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  fontSize: '14px',
-                  fontWeight: '500'
+                  cursor: 'pointer'
                 }}
               >
                 Close
               </button>
             </div>
-            {!isWordCloudMinimized && (
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                alignItems: 'center',
-                width: '100%',
-                height: '100%'
-              }}>
-                <WordCloud data={selectedMarkers.map(marker => marker.notes || '')} />
-              </div>
-            )}
+            <div style={{ flex: 3, overflow: 'auto' }}>
+              <WordCloud data={selectedMarkers.map(marker => marker.notes)} />
+            </div>
           </div>
-        )}       
+        )}
+                 
 
         {/* Coloring the country regions */}
 
@@ -698,6 +696,20 @@ const MapWithGeofencing = () => {
             data={geojsonData}
             style={(feature) => {
               const country = feature.properties.ADMIN;
+              if (showHeatmap) {
+                return country === 'Ukraine' || country === 'Russia'
+                  ? { 
+                      color: '#2b2b2b',
+                      weight: 2,
+                      fillOpacity: 0,
+                      dashArray: 'none'
+                    }
+                  : {
+                      color: 'transparent',
+                      weight: 0,
+                      fillOpacity: 0
+                    };
+              }
               return country === 'Ukraine'
                 ? { color: 'black', weight: 1, fillColor: 'yellow', fillOpacity: 0.4, zIndex: 1, dashArray: '5, 5' }
                 : country === 'Russia'
@@ -706,165 +718,169 @@ const MapWithGeofencing = () => {
             }}     
           />
         )}
+        {/* heatmap */}
+        {showHeatmap && <HeatmapVisualization data={getFilteredMarkers()} />}
 
       {/* Marker Clustering */}
-    {displayMode === 'events' ? (
-      <MarkerClusterGroup key={`events-${dateValue}`}
-        {...clusterOptions}                          
-      >
-        {/* Bitmarkers */}
-
-        {getFilteredMarkers().map((marker, index) => (
-          <Marker
-
-          // for custom markers******************************************
-            key={`${index}-${dateValue}`}
-            position={[marker.lat, marker.lng]}            
-            icon={getEventIcon(marker.subEventType, marker.color)}    
-            zIndex={1000} // Higher z-index value to ensure markers appear on top
-          >
-            {/* Pop up box over the marker */}
-
-            <Popup>
-            <div style={{ 
-                fontFamily: 'math', 
-                fontSize: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '15px',                
-            }}>
-
-            <div style={{ position: 'relative', width: '60px', height: '60px' }}>
-                <div style={{
-                    position: 'absolute',
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: '50%',
-                    backgroundColor: '#A9A9A9',
-                    zIndex: 1
-                }} />
-
-                {/* popupbox image */}
-
-                <img 
-                    src={`${process.env.PUBLIC_URL}${
-                      marker.subEventType === 'Air/drone strike' ? '/Icons/drone.svg'
-                      : marker.subEventType === 'Shelling/artillery/missile attack' ? '/Icons/artillery.svg'
-                      : marker.subEventType === 'Armed clash' ? '/Icons/armed_clash.svg'
-                      : marker.subEventType === 'Arrests' ? '/Icons/arrest.svg'
-                      : marker.subEventType === 'Disrupted weapons use' ? '/Icons/disrupted.svg'
-                      : marker.subEventType === 'Peaceful protest' ? '/Icons/protest.svg'
-                      : marker.subEventType === 'Attack' ? '/Icons/attack.svg'
-                      : marker.subEventType === 'Remote explosive/landmine/IED' ? '/Icons/explosive.svg'
-                      : marker.subEventType === 'Other' ? '/Icons/other.svg'
-                      : marker.subEventType === 'Change to group/activity' ? '/Icons/group.svg'
-                      : marker.subEventType === 'Looting/property destruction' ? '/Icons/destruction.svg'
-                      : marker.subEventType === 'Abduction/forced disappearance' ? '/Icons/abduction.svg'
-                      : marker.subEventType === 'Grenade' ? '/Icons/grenade.svg'
-                      : marker.subEventType === 'Government regains territory' ? '/Icons/regains_territory.svg'
-                      : marker.subEventType === 'Non-state actor overtakes territory' ? '/Icons/non_state_actor.svg'
-                      : marker.subEventType === 'Agreement' ? '/Icons/agreement.svg'
-                      : marker.subEventType === 'Mob violence' ? '/Icons/mob_violence.svg'
-                      : marker.subEventType === 'Non-violent transfer of territory' ? '/Icons/non_violent.svg'
-                      : '/default-icon.svg'}`}
-                  alt={marker.subEventType || 'Event icon'}
-                style={{ 
-                    width: '60px', 
-                    height: '60px', 
-                    // borderRadius: '50%',
-                    position: 'relative',
-                    zIndex: 2,                    
-                    filter: marker.color === 'red' 
-                        ? 'invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%)'
-                        : marker.color === 'black' 
-                        ? 'brightness(0%)'
-                        : 'invert(50%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%)', // for gray                    
-                }} 
-                />
-                </div>
-
-                {/* popup box information */}
-                
-                <div>
-                <div style={{ color: '#333', marginBottom: '20px' }}>
-                    <strong>Sub Event Type:</strong> {marker.subEventType}
-                </div>
-                <div style={{ color: '#333', marginBottom: '0.5px' }}>
-                    <strong>Date:</strong> {marker.event_date}
-                </div>
-                <div style={{ color: '#333', marginBottom: '0px', display: 'flex', alignItems: 'center' }}>
-                <strong>Fatalities: </strong> {marker.fatalities}
-                {marker.fatalities <= 5 && (
-                    <img 
-                    src={`${process.env.PUBLIC_URL}/Icons/fatality_low.svg`} 
-                    style={{ width: '80px', height: '80px', marginLeft: '5px' }}
-                    alt="Low"
-                    />
-                )}
-                {marker.fatalities > 5 && marker.fatalities <= 20 && (
-                    <img 
-                    src={`${process.env.PUBLIC_URL}/Icons/fatality_medium.svg`} 
-                    style={{ width: '80px', height: '80px', marginRight: '5px' }}
-                    alt="Medium"
-                    />
-                )}
-                {marker.fatalities > 20 && (
-                    <img 
-                    src={`${process.env.PUBLIC_URL}/Icons/fatality_high.svg`} 
-                    style={{ width: '80px', height: '80px', marginLeft: '5px' }}
-                    alt="High"
-                    />
-                )}
-                </div>
-                <div style={{ color: '#333' }}>
-                    <strong>Notes:</strong> {marker.notes}
-                </div>
-                </div>                
-            </div>
-            </Popup>
-          </Marker>
-        ))}
-      </MarkerClusterGroup>
-    ):(
-      <MarkerClusterGroup key={`fatalities-${dateValue}`}
-          {...clusterOptions2}
+    {displayMode !== 'none' && (
+      displayMode === 'events' ? (
+        <MarkerClusterGroup key={`events-${dateValue}`}
+          {...clusterOptions}                          
         >
+          {/* Bitmarkers */}
+
           {getFilteredMarkers().map((marker, index) => (
             <Marker
+
+            // for custom markers******************************************
               key={`${index}-${dateValue}`}
-              position={[marker.lat, marker.lng]}
-              properties={{ fatalities: marker.fatalities }}
-              eventHandlers={{
-                add: (e) => {
-                  e.target.options.totalFatalities = marker.fatalities;
-                }
-              }}
-              icon={L.divIcon({
-                html: `<div style="
-                  background-color: ${marker.color};
-                  color: white;
-                  border-radius: 50%;
-                  width: 30px;
-                  height: 30px;
-                  display: flex;
-                  align-items: center;
-                  justify-content: center;
-                  font-weight: bold;
-                ">${marker.fatalities}</div>`,
-                className: ''
-              })}
+              position={[marker.lat, marker.lng]}            
+              icon={getEventIcon(marker.subEventType, marker.color)}    
+              zIndex={1000} // Higher z-index value to ensure markers appear on top
             >
+              {/* Pop up box over the marker */}
+
               <Popup>
-                <div>
-                  <h3>Fatalities: {marker.fatalities}</h3>
-                  <p>Event Type: {marker.subEventType}</p>
-                  <p>Date: {marker.event_date}</p>
-                </div>
+              <div style={{ 
+                  fontFamily: 'math', 
+                  fontSize: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '15px',                
+              }}>
+
+              <div style={{ position: 'relative', width: '60px', height: '60px' }}>
+                  <div style={{
+                      position: 'absolute',
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '50%',
+                      backgroundColor: '#A9A9A9',
+                      zIndex: 1
+                  }} />
+
+                  {/* popupbox image */}
+
+                  <img 
+                      src={`${process.env.PUBLIC_URL}${
+                        marker.subEventType === 'Air/drone strike' ? '/Icons/drone.svg'
+                        : marker.subEventType === 'Shelling/artillery/missile attack' ? '/Icons/artillery.svg'
+                        : marker.subEventType === 'Armed clash' ? '/Icons/armed_clash.svg'
+                        : marker.subEventType === 'Arrests' ? '/Icons/arrest.svg'
+                        : marker.subEventType === 'Disrupted weapons use' ? '/Icons/disrupted.svg'
+                        : marker.subEventType === 'Peaceful protest' ? '/Icons/protest.svg'
+                        : marker.subEventType === 'Attack' ? '/Icons/attack.svg'
+                        : marker.subEventType === 'Remote explosive/landmine/IED' ? '/Icons/explosive.svg'
+                        : marker.subEventType === 'Other' ? '/Icons/other.svg'
+                        : marker.subEventType === 'Change to group/activity' ? '/Icons/group.svg'
+                        : marker.subEventType === 'Looting/property destruction' ? '/Icons/destruction.svg'
+                        : marker.subEventType === 'Abduction/forced disappearance' ? '/Icons/abduction.svg'
+                        : marker.subEventType === 'Grenade' ? '/Icons/grenade.svg'
+                        : marker.subEventType === 'Government regains territory' ? '/Icons/regains_territory.svg'
+                        : marker.subEventType === 'Non-state actor overtakes territory' ? '/Icons/non_state_actor.svg'
+                        : marker.subEventType === 'Agreement' ? '/Icons/agreement.svg'
+                        : marker.subEventType === 'Mob violence' ? '/Icons/mob_violence.svg'
+                        : marker.subEventType === 'Non-violent transfer of territory' ? '/Icons/non_violent.svg'
+                        : '/default-icon.svg'}`}
+                    alt={marker.subEventType || 'Event icon'}
+                  style={{ 
+                      width: '60px', 
+                      height: '60px', 
+                      // borderRadius: '50%',
+                      position: 'relative',
+                      zIndex: 2,                    
+                      filter: marker.color === 'red' 
+                          ? 'invert(27%) sepia(51%) saturate(2878%) hue-rotate(346deg) brightness(104%) contrast(97%)'
+                          : marker.color === 'black' 
+                          ? 'brightness(0%)'
+                          : 'invert(50%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(100%) contrast(100%)', // for gray                    
+                  }} 
+                  />
+                  </div>
+
+                  {/* popup box information */}
+                  
+                  <div>
+                  <div style={{ color: '#333', marginBottom: '20px' }}>
+                      <strong>Sub Event Type:</strong> {marker.subEventType}
+                  </div>
+                  <div style={{ color: '#333', marginBottom: '0.5px' }}>
+                      <strong>Date:</strong> {marker.event_date}
+                  </div>
+                  <div style={{ color: '#333', marginBottom: '0px', display: 'flex', alignItems: 'center' }}>
+                  <strong>Fatalities: </strong> {marker.fatalities}
+                  {marker.fatalities <= 5 && (
+                      <img 
+                      src={`${process.env.PUBLIC_URL}/Icons/fatality_low.svg`} 
+                      style={{ width: '80px', height: '80px', marginLeft: '5px' }}
+                      alt="Low"
+                      />
+                  )}
+                  {marker.fatalities > 5 && marker.fatalities <= 20 && (
+                      <img 
+                      src={`${process.env.PUBLIC_URL}/Icons/fatality_medium.svg`} 
+                      style={{ width: '80px', height: '80px', marginRight: '5px' }}
+                      alt="Medium"
+                      />
+                  )}
+                  {marker.fatalities > 20 && (
+                      <img 
+                      src={`${process.env.PUBLIC_URL}/Icons/fatality_high.svg`} 
+                      style={{ width: '80px', height: '80px', marginLeft: '5px' }}
+                      alt="High"
+                      />
+                  )}
+                  </div>
+                  <div style={{ color: '#333' }}>
+                      <strong>Notes:</strong> {marker.notes}
+                  </div>
+                  </div>                
+              </div>
               </Popup>
             </Marker>
           ))}
         </MarkerClusterGroup>
-      )}
+      ):(
+        <MarkerClusterGroup key={`fatalities-${dateValue}`}
+            {...clusterOptions2}
+          >
+            {getFilteredMarkers().map((marker, index) => (
+              <Marker
+                key={`${index}-${dateValue}`}
+                position={[marker.lat, marker.lng]}
+                properties={{ fatalities: marker.fatalities }}
+                eventHandlers={{
+                  add: (e) => {
+                    e.target.options.totalFatalities = marker.fatalities;
+                  }
+                }}
+                icon={L.divIcon({
+                  html: `<div style="
+                    background-color: ${marker.color};
+                    color: white;
+                    border-radius: 50%;
+                    width: 30px;
+                    height: 30px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: bold;
+                  ">${marker.fatalities}</div>`,
+                  className: ''
+                })}
+              >
+                <Popup>
+                  <div>
+                    <h3>Fatalities: {marker.fatalities}</h3>
+                    <p>Event Type: {marker.subEventType}</p>
+                    <p>Date: {marker.event_date}</p>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+          </MarkerClusterGroup>
+          )
+        )}
 
         {/* rectangle select information */}
 

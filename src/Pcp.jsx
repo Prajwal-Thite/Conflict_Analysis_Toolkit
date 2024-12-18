@@ -66,7 +66,7 @@ const ParallelCoordinatesPlot = ({ data }) => {
       });
 
       if (dimension === "subEventType") {
-        // Group similar event types together
+        // grouped similar event types together
         const uniqueSubEvents = [...new Set(values)];
         console.log("Unique subEventTypes:", uniqueSubEvents);
         const sortedValues = [...new Set(values)].sort((a, b) => {    
@@ -140,7 +140,7 @@ const ParallelCoordinatesPlot = ({ data }) => {
           .domain(sortedValues)
           .range([height, 0]);
       } else {
-        // Keep existing scale logic for other dimensions
+        // scale logic for other dimensions
         if (typeof values[0] === "string") {
           yScales[dimension] = d3
             .scalePoint()
@@ -159,8 +159,7 @@ const ParallelCoordinatesPlot = ({ data }) => {
     const eventTypes = [...new Set(data.map(d => d.event_type))];
     const colorScale = d3.scaleOrdinal()
       .domain(eventTypes)
-      .range(d3.schemeCategory10);
-    
+      .range(d3.schemeCategory10);    
    
     // const colorScale = d3.scaleOrdinal()
     //   .domain(eventTypes)
@@ -293,14 +292,7 @@ const ParallelCoordinatesPlot = ({ data }) => {
           .style("opacity", isSelectedType ? 1 : 0.1);
         
         tooltip.style("display", "none");
-      })
-      // .on("mouseout", function () {
-      //   d3.select(this)
-      //     // .style("stroke", "steelblue")
-      //     .style("stroke-width", "1.5px")
-      //     .style("opacity", 0.3);
-      //   tooltip.style("display", "none");
-      // });    
+      })  
 
     const axes = svg
       .selectAll(".axis")
@@ -313,7 +305,6 @@ const ParallelCoordinatesPlot = ({ data }) => {
         d3.select(this).call(d3.axisLeft(yScales[d]));
       });
     
-    // legend
     const legend = svg.append("g")
       .attr("class", "legend")
       .attr("transform", `translate(${width - 120}, ${100})`)
@@ -327,7 +318,7 @@ const ParallelCoordinatesPlot = ({ data }) => {
       .attr("transform", (d, i) => `translate(0, ${i * 50})`)
       .style("cursor", "pointer")
       .on("click", function(event, d) {
-        // Toggle highlight for selected event type
+        // toggle highlight for selected event type
         const isActive = !d3.select(this).classed("active");
         legend.selectAll(".legend-item").classed("active", false);
         d3.select(this).classed("active", isActive);

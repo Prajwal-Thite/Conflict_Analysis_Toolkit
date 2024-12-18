@@ -25,7 +25,7 @@ const WordCloud = ({ data }) => {
         !['the', 'and', 'for', 'with', 'that', 'this', 'from', 'were', 'what'].includes(word)
       );
 
-    // Count word frequency
+    // word frequency
     const wordCount = {};
     words.forEach(word => {
       wordCount[word] = (wordCount[word] || 0) + 1;
@@ -37,7 +37,7 @@ const WordCloud = ({ data }) => {
     const calculateDynamicScale = (wordCount, containerWidth, containerHeight) => {
     const totalWords = Object.keys(wordCount).length;
     const containerArea = containerWidth * containerHeight;
-    const scaleFactor = Math.sqrt(containerArea / totalWords) * 0.3;
+    const scaleFactor = Math.sqrt(containerArea / totalWords) * 0.32;
     return scaleFactor;
     };
 
@@ -88,9 +88,9 @@ const WordCloud = ({ data }) => {
     <div 
     ref={svgRef} 
     style={{ 
-      width: '100%',           // Make container width responsive
-      maxWidth: '1000px',      // Set maximum width
-      height: '600px',         // Match the height
+      width: '100%',           
+      maxWidth: '1000px',      
+      height: '600px',         
       margin: '0 auto',
       backgroundColor: '#ffffff',
       border: '2px solid #ccc',
