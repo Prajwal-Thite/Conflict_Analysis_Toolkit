@@ -49,6 +49,7 @@ const WordCloud = ({ data }) => {
     }))
     .sort((a, b) => b.size - a.size)
     .slice(0, 50); 
+    
 
     const layout = cloud()
       .size([width, height])
@@ -57,6 +58,8 @@ const WordCloud = ({ data }) => {
       .rotate(() => 0)
       .fontSize(d => Math.min(d.size, 60))
       .spiral('archimedean')
+      .text(d => d.text)
+      .random(() => 0.5)
       .on("end", draw);
 
 

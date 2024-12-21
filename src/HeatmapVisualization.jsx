@@ -106,12 +106,21 @@ const HeatmapVisualization = ({ data }) => {
   React.useEffect(() => {
     if (!data || !data.length) return;
 
+    // map.setMaxZoom(8);
+    // map.setMinZoom(2);
+    
+    // map.on('zoomend', () => {
+    //   if (map.getZoom() > 8) {
+    //     map.setZoom(8);
+    //   }
+    // });  
+
     const aggregatedPoints = aggregatePoints(data);
     const heatLayer = L.heatLayer(aggregatedPoints, {
       radius: 25,
       blur: 15,
       minOpacity: 0.5,
-      maxZoom: 18,
+      maxZoom: 10,
       minZoom: 2,
       gradient: {
         0.3: '#00008B',  // Other 
@@ -125,6 +134,7 @@ const HeatmapVisualization = ({ data }) => {
     return () => {
       map.removeLayer(heatLayer);
       map.removeControl(legend);
+      // map.off('zoomend');
     };
   }, [map, data,]);
 

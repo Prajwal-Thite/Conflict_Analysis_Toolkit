@@ -14,9 +14,9 @@ const ParallelCoordinatesPlot = ({ data }) => {
 
     const dimensions = ["subEventType", "inter1", "inter2", "fatalities"];
 
-    const margin = { top: 80, right: 50, bottom: 10, left: 50 };
-    const width = 1200 - margin.left - margin.right;
-    const height = 500 - margin.top - margin.bottom;
+    const margin = { top: 80, right: 150, bottom: 10, left:5 };
+    const width = window.innerWidth * 0.9 - margin.left - margin.right; //1200 for desktop
+    const height = window.innerWidth * 0.35 - margin.top - margin.bottom; //500 for desktop
 
     d3.select(chartRef.current).selectAll("*").remove();
 
@@ -172,6 +172,9 @@ const ParallelCoordinatesPlot = ({ data }) => {
     //     '#17becf',  // cyan
     //     '#FFD700',  // golden
     //   ]);
+
+    //for dynamically setting up our bundling in pcp
+    const maxFatalities = d3.max(data, d => d.fatalities || 0);
     
     const line = d3.line()
     .x(d => d[0])
@@ -232,9 +235,9 @@ const ParallelCoordinatesPlot = ({ data }) => {
           const fatalities = d.fatalities || 0;
           
           let midY;
-          if (fatalities > 30) {  // High fatalities
+          if (fatalities > maxFatalities * 0.66) {  // High fatalities
             midY = height / 6;
-          } else if (fatalities > 10) {  // Medium fatalities
+          } else if (fatalities > maxFatalities * 0.33) {  // Medium fatalities
             midY = height / 2;
           } else {  // Low fatalities
             midY = 5 * height / 6;
@@ -307,7 +310,7 @@ const ParallelCoordinatesPlot = ({ data }) => {
     
     const legend = svg.append("g")
       .attr("class", "legend")
-      .attr("transform", `translate(${width - 120}, ${100})`)
+      .attr("transform", `translate(${width - 120}, ${30})`)
 
 
     const legendItems = legend.selectAll(".legend-item")
