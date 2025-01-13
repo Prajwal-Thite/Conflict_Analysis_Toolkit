@@ -149,7 +149,7 @@ const MapWithGeofencing = () => {
   const clusterOptions = {
     key: `${displayMode}-${dateValue}`,
     polygonOptions: {
-      fillColor: '#ffffff',
+      fillColor: '#f5f5f5',
       color: '#000000',
       weight: 1,
       opacity: 1,
@@ -169,7 +169,7 @@ const MapWithGeofencing = () => {
   const clusterOptions2 = {
     key: `${displayMode}-${dateValue}`,
     polygonOptions: {
-      fillColor: '#ffffff',
+      fillColor: '#f5f5f5',
       color: '#000000',
       weight: 1,
       opacity: 1,
@@ -431,8 +431,8 @@ const MapWithGeofencing = () => {
         minZoom={2}
       >
         <TileLayer
-          attribution='Map data © <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
 
         {/* popup window for pcp */}
