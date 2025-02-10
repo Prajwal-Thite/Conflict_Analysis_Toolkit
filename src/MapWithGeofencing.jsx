@@ -9,6 +9,7 @@ import ParallelCoordinatesPlot from './Pcp';
 import PixelVisualization from './PixelVisualisation';
 import HeatmapVisualization from './HeatmapVisualization';
 import WordCloud from './WordCloud';
+import ThemeRiver from './ThemeRiver';
 
 import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
@@ -39,6 +40,8 @@ const MapWithGeofencing = () => {
   const [showHeatmap, setShowHeatmap] = useState(false);
   // wordcloud
   const [showWordCloud, setShowWordCloud] = useState(false);
+  // event info
+  const [showEventInfo, setShowEventInfo] = useState(false);
 
   // Fetch GeoJSON data
   useEffect(() => {
@@ -381,6 +384,22 @@ const MapWithGeofencing = () => {
         >
           {showHeatmap ? 'Hide Heatmap' : 'Show Heatmap'}
         </button>
+        <button
+          onClick={() => setShowEventInfo(!showEventInfo)}
+          style={{
+            padding: '8px 16px',
+            borderRadius: '20px',
+            border: '1px solid #e1e4e8',
+            background: 'white',
+            color: '#24292e',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            fontSize: '14px',
+            fontWeight: '500'
+          }}
+        >
+          Event Info
+        </button>
         </div>
 
         {showDateSlider && (
@@ -647,6 +666,8 @@ const MapWithGeofencing = () => {
             {!isPixelMinimized && <PixelVisualization data={selectedMarkers} />}
           </div>
         )}
+
+        {/* pop up for word cloud */}
         
         {showWordCloud && selectedMarkers.length > 0 && (
           <div style={{
@@ -685,6 +706,66 @@ const MapWithGeofencing = () => {
             </div>
             <div style={{ flex: 3, overflow: 'auto' }}>
               <WordCloud data={selectedMarkers.map(marker => marker.notes)} />
+            </div>
+          </div>
+        )}
+
+        {/* pop up for event info */}
+
+        {showEventInfo && (
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%',
+            height: '80%',
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '10px',
+            boxShadow: '0 0 20px rgba(0,0,0,0.3)',
+            zIndex: 9999,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+          onMouseDown={(e) => e.stopPropagation()}
+          onMouseMove={(e) => e.stopPropagation()}
+          onWheel={(e) => e.stopPropagation()}  
+          >
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'flex-end',
+              marginBottom: '10px'
+            }}>
+                <h2 style={{
+                  textAlign: 'center',
+                  margin: '0',
+                  fontSize: '24px',
+                  fontWeight: '600',
+                  width: '100%'
+                }}>Event Type Distribution Over Time</h2>
+              <button 
+                onClick={() => setShowEventInfo(false)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '20px',
+                  border: '1px solid #e1e4e8',
+                  background: 'white',
+                  cursor: 'pointer',
+                }}
+              >
+                Close
+              </button>
+            </div>
+            <div style={{
+              flex: 1,
+              overflow: 'hidden',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '10px',
+              padding: '20px' 
+            }}>
+              <ThemeRiver data={markers} />
             </div>
           </div>
         )}

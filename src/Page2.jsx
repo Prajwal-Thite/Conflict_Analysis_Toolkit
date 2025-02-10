@@ -2,10 +2,56 @@ import React, { useEffect, useRef, useState } from "react";
 import * as d3 from "d3";
 import ParallelSets from "./ParallelSets";
 
-const ParallelCoordinatesPlot = ({ data }) => {
+const ParallelCoordinatesPlot = () => {
   const chartRef = useRef(null);
   //parallel set
   const [showParallelSets, setShowParallelSets] = useState(false);
+  const [data, setData] = useState([]);
+  
+  const fetchData = async () => {
+    try {
+      // Try local path first
+      const response = await fetch(`${process.env.PUBLIC_URL}/complete_dataset.json`);
+      if (!response.ok) {
+        // If local fails, try GitHub Pages URL
+        const ghResponse = await fetch('https://prajwal-thite.github.io/Conflict_Analysis_Toolkit/complete_dataset.json');
+        return await ghResponse.json();
+      }
+      return await response.json();
+    } catch (error) {
+      console.log('Error loading data:', error);
+    }
+  };
+
+  useEffect(() => {
+        
+      fetchData().then((jsonData) => {
+        if (jsonData && Array.isArray(jsonData)) {
+          // Get n points from the dataset
+          const first100Events = jsonData.slice(0, 5000);
+          const points = first100Events.map(event => ({
+            lat: event.latitude,
+            lng: event.longitude,
+            color: event.iso === 643 ? 'red' : event.iso === 804 ? 'black' : 'gray',
+            event_type: event.event_type,
+            subEventType: event.sub_event_type,
+            fatalities: event.fatalities,
+            notes: event.notes,            
+            actor1: event.actor1,
+            assoc_actor_1: event.assoc_actor_1,
+            inter1: event.inter1,
+            actor2: event.actor2,
+            assoc_actor_2: event.assoc_actor_2,
+            inter2: event.inter2,
+            interaction: event.interaction,
+            event_date: event.event_date,
+            sub_event_type_code: event.sub_event_type_code,
+            iso: event.iso,
+          }));
+          setData(points);
+        }
+        });          
+  }, [])
 
   useEffect(() => {
     if (!data || data.length === 0) return;
@@ -16,7 +62,6 @@ const ParallelCoordinatesPlot = ({ data }) => {
     const margin = { top: 150, right: 50, bottom: 10, left:100 };
     const width = window.innerWidth * 0.9 - margin.left - margin.right;
     const height = window.innerWidth * 0.4 - margin.top - margin.bottom;
-
 
     const dimensions = ["subEventType", "inter1", "inter2", "fatalities"];
     const yScales = {};
@@ -32,32 +77,6 @@ const ParallelCoordinatesPlot = ({ data }) => {
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
-
-
-    // // wheel zoom for pcp
-
-    // const zoom = d3.zoom()
-    //   .scaleExtent([1, 5])
-    //   .on("zoom", (event) => {
-    //     svg.attr("transform", event.transform);
-    //   });
-    
-    // d3.select(chartRef.current).call(zoom);
-
-
-    // const tooltip = d3
-    //   .select("body")
-    //   .append("div")
-    //   .attr("class", "tooltip")
-    //   .style("position", "absolute")
-    //   .style("background-color", "white")
-    //   .style("border", "1px solid #ccc")
-    //   .style("padding", "10px")
-    //   .style("border-radius", "5px")
-    //   .style("font-size", "12px")
-    //   .style("display", "none")
-    //   .style("z-index", "9999"); // to ensure tooltip stays on top
-
 
     dimensions.forEach((dimension) => {
       const values = data.map((d) => {
@@ -258,33 +277,6 @@ const ParallelCoordinatesPlot = ({ data }) => {
       .style("stroke-width", "1.5px")
       .style("cursor", "pointer")
       .style("opacity", 0.3)
-      // .on("mouseover", function (event, d) {
-      //   d3.select(this)
-      //     // .style("stroke", "orange")
-      //     .style("stroke-width", "2.5px")
-      //     .style("opacity", 1);
-        
-      //   tooltip
-      //     .style("display", "block")
-      //     .style("left", `${event.pageX + 10}px`)
-      //     .style("top", `${event.pageY - 10}px`)
-      //     .style("background", "rgba(255, 255, 255, 0.95)")
-      //     .style("padding", "15px")
-      //     .style("border-radius", "8px")
-      //     .style("box-shadow", "0 2px 10px rgba(0,0,0,0.2)")
-      //     .style("font-family", "Arial, sans-serif")
-      //     .style("max-width", "300px")          
-      //     .html(`
-      //       <div style="font-size: 14px; line-height: 1.5;">
-      //         <h3 style="margin: 0 0 10px 0; color: #333;">Event Details</h3>
-      //         <p><strong>Actor 1:</strong> ${d.actor1}</p>
-      //         <p><strong>Actor 2:</strong> ${d.actor2}</p>              
-      //         <p><strong>Sub Event Type:</strong> ${d.subEventType}</p>
-      //         <p><strong>Fatalities:</strong> ${d.fatalities}</p>
-      //         <p><strong>Notes:</strong> ${d.notes}</p>
-      //       </div>
-      //     `);
-      // })
       .on("mouseout", function (event, d) {
         const legendActive = legend.select(".legend-item.active").size() > 0;
         const isSelectedType = legendActive && 
@@ -356,7 +348,7 @@ const ParallelCoordinatesPlot = ({ data }) => {
     axes
       .append("text")
       .style("text-anchor", "middle")
-      .attr("y", -40)
+      .attr("y", -50)
       .style("font-size", "16px")
       .style("font-weight", "bold")
       .style("fill", "black")
