@@ -1,5 +1,5 @@
 import React from 'react';
-import { HashRouter  as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MapWithGeofencing from './MapWithGeofencing';
 import Page1 from './Page1';
 import Page2 from './Page2';
