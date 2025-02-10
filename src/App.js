@@ -1,24 +1,24 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MapWithGeofencing from './MapWithGeofencing';
-import Page1 from './Page1';
-import Page2 from './Page2';
-import Page3 from './Page3';
-import Page4 from './Page4';
-import Page5 from './Page5';
-import Page6 from './Page6';
+import MapWithGeofencing_single from './Page1';
+import ParallelCoordinatesPlot from './Page2';
+import IntegratedHeatmap from './Page3';
+import ThemeRiver from './Page4';
+import PixelVisualization from './Page5';
+import WordCloud from './Page6';
 
 function App() {
   return (
     <Router basename="/Conflict_Analysis_Toolkit">
       <Routes>
         <Route path="/" element={<MapWithGeofencing />} />
-        <Route path="/geomap" element={<Page1 />} />
-        <Route path="/pcp" element={<Page2 />} />
-        <Route path="/heatmap" element={<Page3 />} />
-        <Route path="/themeriver" element={<Page4 />} />
-        <Route path="/pixel" element={<Page5 />} />
-        <Route path="/wordcloud" element={<Page6 />} />
+        <Route path="/geomap" element={<MapWithGeofencing_single />} />
+        <Route path="/pcp" element={<ParallelCoordinatesPlot />} />
+        <Route path="/heatmap" element={<IntegratedHeatmap />} />
+        <Route path="/themeriver" element={<ThemeRiver />} />
+        <Route path="/pixel" element={<PixelVisualization />} />
+        <Route path="/wordcloud" element={<WordCloud />} />
       </Routes>
     </Router>
   );

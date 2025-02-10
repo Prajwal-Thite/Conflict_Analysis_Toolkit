@@ -9,7 +9,7 @@ import 'leaflet.markercluster/dist/MarkerCluster.css';
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import MarkerClusterGroup from 'react-leaflet-markercluster';
 
-const MapWithGeofencing = () => {
+const MapWithGeofencing_single = () => {
   const [markers, setMarkers] = useState([]);
   const [geojsonData, setGeojsonData] = useState(null);
   const [displayMode, setDisplayMode] = useState('events'); // 'events' or 'fatalities'
@@ -489,4 +489,4 @@ const MapWithGeofencing = () => {
   );
 };
 
-export default MapWithGeofencing;
+export default MapWithGeofencing_single;
