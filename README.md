@@ -1,70 +1,75 @@
-# Getting Started with Create React App
+# Conflict Analysis Toolkit
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+An interactive visual analytics dashboard for exploring armed conflict event data, focused on the Russia-Ukraine conflict. Built with React, D3.js, and Leaflet.
 
-## Available Scripts
+**Live Demo:** [https://prajwal-thite.github.io/Conflict_Analysis_Toolkit/](https://prajwal-thite.github.io/Conflict_Analysis_Toolkit/)
 
-In the project directory, you can run:
+![Conflict Analysis Toolkit](Conflict%20analysis%20toolkit.png)
 
-### `npm start`
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Features
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+The toolkit offers multiple coordinated views, each accessible as a standalone page or as a linked panel within the main dashboard.
 
-### `npm test`
+| View | Route | Description |
+|---|---|---|
+| Main Dashboard | `/` | Integrated map with geofencing selection linked to all other views |
+| Geo Map | `/geomap` | Standalone event/fatality map with timeline slider |
+| Parallel Coordinates | `/pcp` | Multi-dimensional analysis with Parallel Sets toggle |
+| Heatmap | `/heatmap` | Geographic density heatmap with source-scale legend |
+| Theme River | `/themeriver` | Stacked area chart of event types over time |
+| Pixel Visualization | `/pixel` | Glyph-based calendar/pixel view of events |
+| Word Cloud | `/wordcloud` | Frequency cloud generated from event notes |
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+### Key interactions
+- **Geofencing** — draw a rectangle on the map to filter events; linked views update automatically
+- **Timeline slider** — scrub through dates to see events day by day
+- **Display mode toggle** — switch between event markers and fatality count clusters
+- **Marker clustering** — auto-clusters at scale, expands on zoom
+- **Custom icons** — 18 distinct SVG icons per sub-event type (drone strike, artillery, protest, etc.)
+- **Color coding** — red = Russia (ISO 643), black = Ukraine (ISO 804), gray = other actors
 
-### `npm run build`
+---
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Tech Stack
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+- **React 18** with React Router v7
+- **D3.js v7** — PCP, Pixel, Word Cloud, Parallel Sets
+- **Leaflet + React-Leaflet** — map rendering, marker clustering, geofencing draw
+- **Recharts** — Theme River (stacked area chart)
+- **GitHub Pages** — deployment via `gh-pages`
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## Getting Started
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+**Prerequisites:** Node.js 16+
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+```bash
+# Install dependencies
+npm install
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+# Start development server
+npm start
+# Opens at http://localhost:3000
+```
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+### Build & Deploy
 
-## Learn More
+```bash
+# Build for production
+npm run build
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+# Deploy to GitHub Pages
+npm run deploy
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+---
 
-### Code Splitting
+## Data
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+The dataset (`complete_dataset.json`) contains ACLED-format conflict events with fields including:
+`event_date`, `event_type`, `sub_event_type`, `actor1`, `actor2`, `latitude`, `longitude`, `fatalities`, `notes`, `iso`, `interaction`
 
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Fatality levels: **Low** (≤5), **Medium** (6–20), **High** (>20)
