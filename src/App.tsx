@@ -8,7 +8,7 @@ import ThemeRiver from './Page4';
 import PixelVisualization from './Page5';
 import WordCloud from './Page6';
 
-function App() {
+function App(): React.JSX.Element {
   return (
     <Router basename="/Conflict_Analysis_Toolkit">
       <Routes>
@@ -25,7 +25,3 @@ function App() {
 }
 
 export default App;
-
-{/* <div style={{ height: '100vh', width: '100%' }}>
-<Page6 />
-</div> */}
