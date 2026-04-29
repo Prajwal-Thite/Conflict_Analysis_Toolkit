@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import MapWithGeofencing from './MapWithGeofencing';
+import MapWithGeofencingPage from './presentation/pages/MapWithGeofencingPage';
 import GeoMapPage from './presentation/pages/GeoMapPage';
 import ParallelCoordinatesPage from './presentation/pages/ParallelCoordinatesPage';
 import HeatmapPage from './presentation/pages/HeatmapPage';
@@ -12,7 +12,7 @@ function App(): React.JSX.Element {
   return (
     <Router basename="/Conflict_Analysis_Toolkit">
       <Routes>
-        <Route path="/" element={<MapWithGeofencing />} />
+        <Route path="/" element={<MapWithGeofencingPage />} />
         <Route path="/geomap" element={<GeoMapPage />} />
         <Route path="/pcp" element={<ParallelCoordinatesPage />} />
         <Route path="/heatmap" element={<HeatmapPage />} />

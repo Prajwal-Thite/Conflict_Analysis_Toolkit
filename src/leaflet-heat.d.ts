@@ -33,4 +33,8 @@ declare module 'leaflet' {
     getAllChildMarkers(): Marker[];
     getChildCount(): number;
   }
+
+  interface Map {
+    drawControl?: Control;
+  }
 }
