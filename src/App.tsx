@@ -1,24 +1,24 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MapWithGeofencing from './MapWithGeofencing';
-import MapWithGeofencing_single from './Page1';
-import ParallelCoordinatesPlot from './Page2';
-import IntegratedHeatmap from './Page3';
-import ThemeRiver from './Page4';
-import PixelVisualization from './Page5';
-import WordCloud from './Page6';
+import GeoMapPage from './presentation/pages/GeoMapPage';
+import ParallelCoordinatesPage from './presentation/pages/ParallelCoordinatesPage';
+import HeatmapPage from './presentation/pages/HeatmapPage';
+import ThemeRiverPage from './presentation/pages/ThemeRiverPage';
+import PixelPage from './presentation/pages/PixelPage';
+import WordCloudPage from './presentation/pages/WordCloudPage';
 
 function App(): React.JSX.Element {
   return (
     <Router basename="/Conflict_Analysis_Toolkit">
       <Routes>
         <Route path="/" element={<MapWithGeofencing />} />
-        <Route path="/geomap" element={<MapWithGeofencing_single />} />
-        <Route path="/pcp" element={<ParallelCoordinatesPlot />} />
-        <Route path="/heatmap" element={<IntegratedHeatmap />} />
-        <Route path="/themeriver" element={<ThemeRiver />} />
-        <Route path="/pixel" element={<PixelVisualization />} />
-        <Route path="/wordcloud" element={<WordCloud />} />
+        <Route path="/geomap" element={<GeoMapPage />} />
+        <Route path="/pcp" element={<ParallelCoordinatesPage />} />
+        <Route path="/heatmap" element={<HeatmapPage />} />
+        <Route path="/themeriver" element={<ThemeRiverPage />} />
+        <Route path="/pixel" element={<PixelPage />} />
+        <Route path="/wordcloud" element={<WordCloudPage />} />
       </Routes>
     </Router>
   );

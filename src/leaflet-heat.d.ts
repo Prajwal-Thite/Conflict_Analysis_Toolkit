@@ -23,4 +23,14 @@ declare module 'leaflet' {
     latlngs: Array<[number, number] | [number, number, number]>,
     options?: HeatLayerOptions
   ): HeatLayer;
+
+  interface MarkerOptions {
+    properties?: Record<string, unknown>;
+    totalFatalities?: number;
+  }
+
+  interface MarkerCluster extends Marker {
+    getAllChildMarkers(): Marker[];
+    getChildCount(): number;
+  }
 }

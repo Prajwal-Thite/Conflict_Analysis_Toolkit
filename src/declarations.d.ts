@@ -40,3 +40,10 @@ declare module 'd3-cloud' {
 declare module 'leaflet.heat' {
   export = {};
 }
+
+declare module 'react-leaflet-markercluster' {
+  import { ComponentType, ReactNode } from 'react';
+  type MarkerClusterGroupProps = { children?: ReactNode } & Record<string, unknown>;
+  const MarkerClusterGroup: ComponentType<MarkerClusterGroupProps>;
+  export default MarkerClusterGroup;
+}
