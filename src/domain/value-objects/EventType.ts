@@ -37,3 +37,9 @@ export type SubEventType =
 export type FatalityLevel = 'Low' | 'Medium' | 'High';
 
 export type InteractionCode = string;
+
+export function getFatalityLevel(fatalities: number): FatalityLevel {
+  if (fatalities <= 5) return 'Low';
+  if (fatalities <= 20) return 'Medium';
+  return 'High';
+}
