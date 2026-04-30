@@ -18,6 +18,17 @@ const AXIS_LABELS: Record<PcpDim, string> = {
   fatalities: 'FATALITIES',
 };
 
+const INTER_CODES: Record<number, string> = {
+  1: 'State Forces',
+  2: 'Rebel Groups',
+  3: 'Political Militias',
+  4: 'Identity Militias',
+  5: 'Rioters',
+  6: 'Protesters',
+  7: 'Civilians',
+  8: 'External / Other Forces',
+};
+
 const SUB_EVENT_ORDER: string[] = [
   'regains territory', 'Agreement', 'Arrests', 'Disrupted weapons', 'Change to group',
   'Armed clash', 'Looting', 'Other', 'Attack', 'Remote explosive', 'Grenade',
@@ -51,9 +62,18 @@ function applyYScale(scale: YScale, val: string | number): number {
     (scale as d3.ScalePoint<string>)(val as string) ?? 0;
 }
 
+interface TooltipState {
+  visible: boolean;
+  x: number;
+  y: number;
+  data: ConflictEvent | null;
+}
+
 const ParallelCoordinatesPlot: React.FC<ParallelCoordinatesPlotProps> = ({ data }) => {
   const chartRef = useRef<SVGSVGElement>(null);
   const [showParallelSets, setShowParallelSets] = useState<boolean>(false);
+  const [tooltip, setTooltip] = useState<TooltipState>({ visible: false, x: 0, y: 0, data: null });
+  const [showInterInfo, setShowInterInfo] = useState(false);
 
   useEffect(() => {
     if (!data || data.length === 0 || !chartRef.current) return;
@@ -62,8 +82,9 @@ const ParallelCoordinatesPlot: React.FC<ParallelCoordinatesPlotProps> = ({ data 
     d3.select(chart).selectAll('*').remove();
 
     const margin = { top: 150, right: 50, bottom: 10, left: 100 };
-    const width = window.innerWidth * 0.9 - margin.left - margin.right;
-    const height = window.innerWidth * 0.4 - margin.top - margin.bottom;
+    const containerWidth = chart.parentElement?.clientWidth || window.innerWidth * 0.9;
+    const width = containerWidth - margin.left - margin.right;
+    const height = containerWidth * 0.4 - margin.top - margin.bottom;
 
     const yScales: Partial<Record<PcpDim, YScale>> = {};
     const xScale = d3.scalePoint<string>().domain(DIMENSIONS).range([0, width]).padding(0.9);
@@ -107,6 +128,11 @@ const ParallelCoordinatesPlot: React.FC<ParallelCoordinatesPlotProps> = ({ data 
       .x((point) => point[0])
       .y((point) => point[1])
       .curve(d3.curveNatural);
+
+    const legend = svg
+      .append('g')
+      .attr('class', 'legend')
+      .attr('transform', `translate(${width - 120}, ${30})`);
 
     svg
       .selectAll<SVGPathElement, ConflictEvent>('.line')
@@ -155,7 +181,13 @@ const ParallelCoordinatesPlot: React.FC<ParallelCoordinatesPlotProps> = ({ data 
       .style('stroke-width', '1.5px')
       .style('cursor', 'pointer')
       .style('opacity', 0.3)
+      .on('mouseover', function (event, d) {
+        const [mx, my] = d3.pointer(event, chart.parentElement!);
+        setTooltip({ visible: true, x: mx, y: my, data: d });
+        d3.select(this).style('stroke-width', '4px').style('opacity', 1);
+      })
       .on('mouseout', function (_event, d) {
+        setTooltip((prev) => ({ ...prev, visible: false }));
         const isSelectedType =
           legend.select('.legend-item.active').size() > 0 &&
           d.eventType === (legend.select<SVGGElement>('.legend-item.active').datum() as string);
@@ -176,11 +208,6 @@ const ParallelCoordinatesPlot: React.FC<ParallelCoordinatesPlotProps> = ({ data 
         const scale = yScales[d];
         if (scale) d3.select(this).call(d3.axisLeft(scale as d3.AxisScale<d3.AxisDomain>));
       });
-
-    const legend = svg
-      .append('g')
-      .attr('class', 'legend')
-      .attr('transform', `translate(${width - 120}, ${30})`);
 
     legend
       .selectAll<SVGGElement, string>('.legend-item')
@@ -236,6 +263,78 @@ const ParallelCoordinatesPlot: React.FC<ParallelCoordinatesPlotProps> = ({ data 
         pointerEvents: 'none',
       }}
     >
+      {/* Hover tooltip */}
+      {tooltip.visible && tooltip.data && (
+        <div
+          style={{
+            position: 'absolute',
+            left: tooltip.x + 14,
+            top: tooltip.y - 10,
+            background: 'white',
+            border: '1px solid #ddd',
+            borderRadius: '6px',
+            padding: '10px 14px',
+            pointerEvents: 'none',
+            zIndex: 2000,
+            boxShadow: '0 3px 10px rgba(0,0,0,0.15)',
+            fontSize: '12px',
+            lineHeight: '1.7',
+            maxWidth: '260px',
+          }}
+        >
+          <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#333' }}>
+            {tooltip.data.eventType}
+          </div>
+          <div style={{ color: '#555', marginBottom: '6px' }}>{tooltip.data.subEventType}</div>
+          <div><span style={{ color: '#888' }}>Date:</span> {tooltip.data.eventDate}</div>
+          <div><span style={{ color: '#888' }}>Actor 1:</span> {tooltip.data.actor1.name}</div>
+          {tooltip.data.actor1.associatedActor && (
+            <div style={{ paddingLeft: '8px', color: '#666', fontSize: '11px' }}>
+              assoc: {tooltip.data.actor1.associatedActor}
+            </div>
+          )}
+          {tooltip.data.actor2 && (
+            <div><span style={{ color: '#888' }}>Actor 2:</span> {tooltip.data.actor2.name}</div>
+          )}
+          {tooltip.data.actor2?.associatedActor && (
+            <div style={{ paddingLeft: '8px', color: '#666', fontSize: '11px' }}>
+              assoc: {tooltip.data.actor2.associatedActor}
+            </div>
+          )}
+          <div><span style={{ color: '#888' }}>Location:</span> {tooltip.data.location.name}, {tooltip.data.location.country}</div>
+          <div><span style={{ color: '#888' }}>Fatalities:</span> {tooltip.data.fatalities}</div>
+        </div>
+      )}
+
+      {/* Actor inter-code info panel */}
+      {showInterInfo && (
+        <div
+          style={{
+            position: 'fixed',
+            bottom: '70px',
+            right: '20px',
+            background: 'white',
+            border: '1px solid #ddd',
+            borderRadius: '6px',
+            padding: '12px 16px',
+            zIndex: 1600,
+            boxShadow: '0 3px 10px rgba(0,0,0,0.15)',
+            fontSize: '12px',
+            lineHeight: '1.8',
+            pointerEvents: 'auto',
+          }}
+        >
+          <div style={{ fontWeight: 'bold', marginBottom: '6px' }}>Actor Type Codes</div>
+          {Object.entries(INTER_CODES).map(([code, label]) => (
+            <div key={code}>
+              <span style={{ fontWeight: 600, marginRight: '6px' }}>{code}</span>
+              <span style={{ color: '#555' }}>{label}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Controls */}
       <div
         style={{
           position: 'fixed',
@@ -247,6 +346,9 @@ const ParallelCoordinatesPlot: React.FC<ParallelCoordinatesPlotProps> = ({ data 
           borderRadius: '5px',
           boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
           pointerEvents: 'auto',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '6px',
         }}
       >
         <label style={{ cursor: 'pointer' }}>
@@ -257,6 +359,20 @@ const ParallelCoordinatesPlot: React.FC<ParallelCoordinatesPlotProps> = ({ data 
           />
           {' Show Parallel Sets'}
         </label>
+        <button
+          onClick={() => setShowInterInfo((v) => !v)}
+          style={{
+            background: 'none',
+            border: '1px solid #aaa',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontSize: '12px',
+            padding: '2px 8px',
+            color: '#444',
+          }}
+        >
+          {showInterInfo ? 'Hide' : 'ℹ'} Actor Codes
+        </button>
       </div>
 
       <div
