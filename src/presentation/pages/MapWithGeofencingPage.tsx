@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { MapContainer, TileLayer, GeoJSON, Popup, Marker } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet-draw/dist/leaflet.draw.css';
@@ -298,218 +299,6 @@ const MapWithGeofencingPage: React.FC = () => {
           url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
         />
 
-        {/* PCP popup — shown when region is selected and pixel view is closed */}
-        {selectedMarkers.length > 0 && !showPixelPopup && (
-          <div
-            style={{
-              position: 'fixed',
-              ...(isMinimized
-                ? {
-                    bottom: '20px',
-                    right: '20px',
-                    width: '397px',
-                    height: '20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }
-                : {
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: '85%',
-                    height: '85%',
-                  }),
-              backgroundColor: 'white',
-              padding: '20px',
-              borderRadius: '10px',
-              boxShadow: '0 0 20px rgba(0,0,0,0.3)',
-              zIndex: 2000,
-              transition: 'all 0.3s ease',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button onClick={() => setIsMinimized((v) => !v)} style={BTN_STYLE}>
-                {isMinimized ? 'Maximize' : 'Minimize'}
-              </button>
-              <button
-                onClick={() => {
-                  setShowPixelPopup(true);
-                  setIsPixelMinimized(false);
-                  setIsMinimized(false);
-                }}
-                style={BTN_STYLE}
-              >
-                Show Pixel View
-              </button>
-              <button onClick={() => setShowWordCloud((v) => !v)} style={BTN_STYLE}>
-                {showWordCloud ? 'Hide Word Cloud' : 'Show Word Cloud'}
-              </button>
-              <button onClick={() => setSelectedMarkers([])} style={BTN_STYLE}>
-                Close
-              </button>
-            </div>
-            {!isMinimized && (
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  width: '100%',
-                  height: '100%',
-                }}
-              >
-                <ParallelCoordinatesPlot data={selectedMarkers} />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Pixel visualisation popup */}
-        {showPixelPopup && selectedMarkers.length > 0 && (
-          <div
-            style={{
-              position: 'fixed',
-              ...(isPixelMinimized
-                ? {
-                    bottom: '20px',
-                    right: '20px',
-                    width: '397px',
-                    height: '20px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }
-                : {
-                    top: '60%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: '70%',
-                    height: '40%',
-                  }),
-              backgroundColor: 'white',
-              padding: '20px',
-              borderRadius: '10px',
-              boxShadow: '0 0 20px rgba(0,0,0,0.3)',
-              zIndex: 2001,
-              transition: 'all 0.3s ease',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button onClick={() => setIsPixelMinimized((v) => !v)} style={BTN_STYLE}>
-                {isPixelMinimized ? 'Maximize' : 'Minimize'}
-              </button>
-              <button
-                onClick={() => {
-                  setShowPixelPopup(false);
-                  setIsPixelMinimized(false);
-                  setIsMinimized(false);
-                }}
-                style={BTN_STYLE}
-              >
-                Show PCP View
-              </button>
-              <button onClick={() => setShowWordCloud((v) => !v)} style={BTN_STYLE}>
-                {showWordCloud ? 'Hide Word Cloud' : 'Show Word Cloud'}
-              </button>
-              <button
-                onClick={() => {
-                  setShowPixelPopup(false);
-                  setSelectedMarkers([]);
-                }}
-                style={BTN_STYLE}
-              >
-                Close
-              </button>
-            </div>
-            {!isPixelMinimized && <PixelVisualization data={selectedMarkers} />}
-          </div>
-        )}
-
-        {/* Word cloud popup */}
-        {showWordCloud && selectedMarkers.length > 0 && (
-          <div
-            style={{
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '80%',
-              height: '80%',
-              backgroundColor: 'white',
-              padding: '20px',
-              borderRadius: '10px',
-              boxShadow: '0 0 20px rgba(0,0,0,0.3)',
-              zIndex: 9999,
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-              <button onClick={() => setShowWordCloud(false)} style={BTN_STYLE}>
-                Close
-              </button>
-            </div>
-            <div style={{ flex: 3, overflow: 'auto' }}>
-              <WordCloud data={selectedMarkers.map((e) => e.notes)} />
-            </div>
-          </div>
-        )}
-
-        {/* Event type distribution (ThemeRiver) popup */}
-        {showEventInfo && (
-          <div
-            style={{
-              position: 'fixed',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: '80%',
-              height: '80%',
-              backgroundColor: 'white',
-              padding: '20px',
-              borderRadius: '10px',
-              boxShadow: '0 0 20px rgba(0,0,0,0.3)',
-              zIndex: 9999,
-              overflow: 'hidden',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-            onMouseDown={(e) => e.stopPropagation()}
-            onMouseMove={(e) => e.stopPropagation()}
-            onWheel={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
-              <h2
-                style={{
-                  textAlign: 'center',
-                  margin: '0',
-                  fontSize: '24px',
-                  fontWeight: '600',
-                  width: '100%',
-                }}
-              >
-                Event Type Distribution Over Time
-              </h2>
-              <button onClick={() => setShowEventInfo(false)} style={BTN_STYLE}>
-                Close
-              </button>
-            </div>
-            <div
-              style={{
-                flex: 1,
-                overflow: 'hidden',
-                backgroundColor: '#f8f9fa',
-                borderRadius: '10px',
-                padding: '20px',
-              }}
-            >
-              <ThemeRiver data={events} />
-            </div>
-          </div>
-        )}
-
         {/* Country borders */}
         {geojsonData && (
           <GeoJSON
@@ -623,12 +412,7 @@ const MapWithGeofencingPage: React.FC = () => {
                 <Marker
                   key={`${index}-${dateValue}`}
                   position={[event.location.lat, event.location.lng]}
-                  eventHandlers={{
-                    add: (e) => {
-                      const marker = e.target as L.Marker;
-                      marker.options.properties = { fatalities: event.fatalities };
-                    },
-                  }}
+                  properties={{ fatalities: event.fatalities }}
                   icon={L.divIcon({
                     html: `<div style="background-color:${event.markerColor};color:white;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-weight:bold;">${event.fatalities}</div>`,
                     className: '',
@@ -748,6 +532,218 @@ const MapWithGeofencingPage: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {/* Portals — rendered into document.body so position:fixed is relative to the
+          viewport and Leaflet's DOM cannot intercept pointer events */}
+
+      {selectedMarkers.length > 0 && !showPixelPopup && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            ...(isMinimized
+              ? {
+                  bottom: '20px',
+                  right: '20px',
+                  width: '397px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }
+              : {
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '85%',
+                  height: '85%',
+                }),
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '10px',
+            boxShadow: '0 0 20px rgba(0,0,0,0.3)',
+            zIndex: 2000,
+            transition: 'all 0.3s ease',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <button onClick={() => setIsMinimized((v) => !v)} style={BTN_STYLE}>
+              {isMinimized ? 'Maximize' : 'Minimize'}
+            </button>
+            <button
+              onClick={() => {
+                setShowPixelPopup(true);
+                setIsPixelMinimized(false);
+                setIsMinimized(false);
+              }}
+              style={BTN_STYLE}
+            >
+              Show Pixel View
+            </button>
+            <button onClick={() => setShowWordCloud((v) => !v)} style={BTN_STYLE}>
+              {showWordCloud ? 'Hide Word Cloud' : 'Show Word Cloud'}
+            </button>
+            <button onClick={() => setSelectedMarkers([])} style={BTN_STYLE}>
+              Close
+            </button>
+          </div>
+          {!isMinimized && (
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: '100%',
+                height: '100%',
+              }}
+            >
+              <ParallelCoordinatesPlot data={selectedMarkers} />
+            </div>
+          )}
+        </div>,
+        document.body
+      )}
+
+      {showPixelPopup && selectedMarkers.length > 0 && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            ...(isPixelMinimized
+              ? {
+                  bottom: '20px',
+                  right: '20px',
+                  width: '397px',
+                  height: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }
+              : {
+                  top: '60%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  width: '70%',
+                  height: '40%',
+                }),
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '10px',
+            boxShadow: '0 0 20px rgba(0,0,0,0.3)',
+            zIndex: 2001,
+            transition: 'all 0.3s ease',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <button onClick={() => setIsPixelMinimized((v) => !v)} style={BTN_STYLE}>
+              {isPixelMinimized ? 'Maximize' : 'Minimize'}
+            </button>
+            <button
+              onClick={() => {
+                setShowPixelPopup(false);
+                setIsPixelMinimized(false);
+                setIsMinimized(false);
+              }}
+              style={BTN_STYLE}
+            >
+              Show PCP View
+            </button>
+            <button onClick={() => setShowWordCloud((v) => !v)} style={BTN_STYLE}>
+              {showWordCloud ? 'Hide Word Cloud' : 'Show Word Cloud'}
+            </button>
+            <button
+              onClick={() => {
+                setShowPixelPopup(false);
+                setSelectedMarkers([]);
+              }}
+              style={BTN_STYLE}
+            >
+              Close
+            </button>
+          </div>
+          {!isPixelMinimized && <PixelVisualization data={selectedMarkers} />}
+        </div>,
+        document.body
+      )}
+
+      {showWordCloud && selectedMarkers.length > 0 && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%',
+            height: '80%',
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '10px',
+            boxShadow: '0 0 20px rgba(0,0,0,0.3)',
+            zIndex: 9999,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+            <button onClick={() => setShowWordCloud(false)} style={BTN_STYLE}>
+              Close
+            </button>
+          </div>
+          <div style={{ flex: 3, overflow: 'auto' }}>
+            <WordCloud data={selectedMarkers.map((e) => e.notes)} />
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {showEventInfo && createPortal(
+        <div
+          style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '80%',
+            height: '80%',
+            backgroundColor: 'white',
+            padding: '20px',
+            borderRadius: '10px',
+            boxShadow: '0 0 20px rgba(0,0,0,0.3)',
+            zIndex: 9999,
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '10px' }}>
+            <h2
+              style={{
+                textAlign: 'center',
+                margin: '0',
+                fontSize: '24px',
+                fontWeight: '600',
+                width: '100%',
+              }}
+            >
+              Event Type Distribution Over Time
+            </h2>
+            <button onClick={() => setShowEventInfo(false)} style={BTN_STYLE}>
+              Close
+            </button>
+          </div>
+          <div
+            style={{
+              flex: 1,
+              overflow: 'hidden',
+              backgroundColor: '#f8f9fa',
+              borderRadius: '10px',
+              padding: '20px',
+            }}
+          >
+            <ThemeRiver data={events} />
+          </div>
+        </div>,
+        document.body
+      )}
     </div>
   );
 };
