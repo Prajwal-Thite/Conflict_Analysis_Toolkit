@@ -101,6 +101,34 @@ const BTN_STYLE: React.CSSProperties = {
   fontWeight: '500',
 };
 
+const GUIDE_ITEMS = [
+  {
+    key: 'rectangleSelect',
+    label: 'Rectangle Select',
+    description: 'Draw a rectangle on the map to select all conflict events within that area for analysis.',
+  },
+  {
+    key: 'displayMode',
+    label: 'Show: Events / Fatalities / None',
+    description: 'Toggle markers between event type icons, fatality count bubbles, or hide all markers.',
+  },
+  {
+    key: 'timeline',
+    label: 'Show / Hide Timeline',
+    description: 'Reveal a date slider to filter and step through events day by day.',
+  },
+  {
+    key: 'heatmap',
+    label: 'Show / Hide Heatmap',
+    description: 'Overlay a density heatmap showing where conflict events are most concentrated.',
+  },
+  {
+    key: 'eventInfo',
+    label: 'Event Info',
+    description: 'Open a Theme River chart showing how event types distribute and change over time.',
+  },
+];
+
 const MapWithGeofencingPage: React.FC = () => {
   const { events, loading } = useConflictData();
   const [geojsonData, setGeojsonData] = useState<GeoJsonObject | null>(null);
@@ -119,6 +147,30 @@ const MapWithGeofencingPage: React.FC = () => {
   const [showHeatmap, setShowHeatmap] = useState<boolean>(false);
   const [showWordCloud, setShowWordCloud] = useState<boolean>(false);
   const [showEventInfo, setShowEventInfo] = useState<boolean>(false);
+  const [showTooltips, setShowTooltips] = useState<boolean>(true);
+  const btnRefs = useRef<Record<string, HTMLButtonElement | null>>({
+    rectangleSelect: null, displayMode: null, timeline: null, heatmap: null, eventInfo: null,
+  });
+  const listItemRefs = useRef<Record<string, HTMLDivElement | null>>({
+    rectangleSelect: null, displayMode: null, timeline: null, heatmap: null, eventInfo: null,
+  });
+  type BtnHighlight = { key: string; left: number; top: number; width: number; height: number };
+  const [btnHighlights, setBtnHighlights] = useState<BtnHighlight[]>([]);
+
+  useEffect(() => {
+    if (!showTooltips) return;
+    const id = setTimeout(() => {
+      requestAnimationFrame(() => {
+        const highlights = GUIDE_ITEMS.map(({ key }) => {
+          const r = btnRefs.current[key]?.getBoundingClientRect();
+          if (!r) return null;
+          return { key, left: r.left, top: r.top, width: r.width, height: r.height };
+        }).filter((v): v is BtnHighlight => v !== null);
+        setBtnHighlights(highlights);
+      });
+    }, 80);
+    return () => clearTimeout(id);
+  }, [showTooltips]);
 
   useEffect(() => {
     fetch(GEO_COUNTRIES_URL)
@@ -229,12 +281,17 @@ const MapWithGeofencingPage: React.FC = () => {
     <div style={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Toolbar */}
       <div style={{ padding: '10px', background: '#f0f0f0' }}>
-        <div style={{ display: 'flex', gap: '10px' }}>
-          <button onClick={toggleDraw} style={BTN_STYLE}>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <button
+            ref={(el) => { btnRefs.current.rectangleSelect = el; }}
+            onClick={toggleDraw}
+            style={BTN_STYLE}
+          >
             {drawEnabled ? 'Disable' : 'Enable'} Rectangle Select
           </button>
 
           <button
+            ref={(el) => { btnRefs.current.displayMode = el; }}
             onClick={() =>
               setDisplayMode((prev) =>
                 prev === 'events' ? 'fatalities' : prev === 'fatalities' ? 'none' : 'events'
@@ -245,16 +302,50 @@ const MapWithGeofencingPage: React.FC = () => {
             Show: {displayMode === 'events' ? 'Events' : displayMode === 'fatalities' ? 'Fatalities' : 'None'}
           </button>
 
-          <button onClick={() => setShowDateSlider((v) => !v)} style={BTN_STYLE}>
+          <button
+            ref={(el) => { btnRefs.current.timeline = el; }}
+            onClick={() => setShowDateSlider((v) => !v)}
+            style={BTN_STYLE}
+          >
             {showDateSlider ? 'Hide Timeline' : 'Show Timeline'}
           </button>
 
-          <button onClick={() => setShowHeatmap((v) => !v)} style={BTN_STYLE}>
+          <button
+            ref={(el) => { btnRefs.current.heatmap = el; }}
+            onClick={() => setShowHeatmap((v) => !v)}
+            style={BTN_STYLE}
+          >
             {showHeatmap ? 'Hide Heatmap' : 'Show Heatmap'}
           </button>
 
-          <button onClick={() => setShowEventInfo((v) => !v)} style={BTN_STYLE}>
+          <button
+            ref={(el) => { btnRefs.current.eventInfo = el; }}
+            onClick={() => setShowEventInfo((v) => !v)}
+            style={BTN_STYLE}
+          >
             Event Info
+          </button>
+
+          <button
+            onClick={() => setShowTooltips(true)}
+            title="Show toolbar guide"
+            style={{
+              ...BTN_STYLE,
+              padding: '0',
+              width: '28px',
+              height: '28px',
+              borderRadius: '50%',
+              fontSize: '13px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              background: '#E8F4FD',
+              color: '#0969DA',
+              border: '1px solid #BAD8FB',
+            }}
+          >
+            ⓘ
           </button>
         </div>
 
@@ -692,6 +783,135 @@ const MapWithGeofencingPage: React.FC = () => {
             <WordCloud data={selectedMarkers.map((e) => e.notes)} />
           </div>
         </div>,
+        document.body
+      )}
+
+      {showTooltips && createPortal(
+        <>
+          {/* Dimmed backdrop — click to dismiss */}
+          <div
+            style={{
+              position: 'fixed',
+              top: 0, left: 0, right: 0, bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.22)',
+              zIndex: 9997,
+            }}
+            onClick={() => setShowTooltips(false)}
+          />
+
+          {/* Highlighted button rings + numbered badges */}
+          {btnHighlights.map(({ key, left, top, width, height }, i) => (
+            <React.Fragment key={key}>
+              {/* Glowing ring around the button */}
+              <div
+                style={{
+                  position: 'fixed',
+                  left: left - 4,
+                  top: top - 4,
+                  width: width + 8,
+                  height: height + 8,
+                  borderRadius: '24px',
+                  border: '2px solid #0969DA',
+                  boxShadow: '0 0 0 4px rgba(9,105,218,0.18)',
+                  pointerEvents: 'none',
+                  zIndex: 9998,
+                }}
+              />
+              {/* Numbered badge at top-left of button */}
+              <div
+                style={{
+                  position: 'fixed',
+                  left: left - 9,
+                  top: top - 9,
+                  width: '18px',
+                  height: '18px',
+                  borderRadius: '50%',
+                  backgroundColor: '#0969DA',
+                  color: 'white',
+                  fontSize: '10px',
+                  fontWeight: '700',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  pointerEvents: 'none',
+                  zIndex: 9999,
+                  boxShadow: '0 1px 4px rgba(9,105,218,0.5)',
+                }}
+              >
+                {i + 1}
+              </div>
+            </React.Fragment>
+          ))}
+
+          {/* Guide modal */}
+          <div
+            style={{
+              position: 'fixed',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              width: '360px',
+              backgroundColor: 'white',
+              borderRadius: '16px',
+              border: '1px solid #e1e4e8',
+              boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+              zIndex: 10000,
+              padding: '20px 22px 14px',
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <span style={{ fontSize: '14px', fontWeight: '600', color: '#24292e' }}>Toolbar Guide</span>
+              <button
+                onClick={() => setShowTooltips(false)}
+                style={{
+                  background: 'none', border: 'none', cursor: 'pointer',
+                  fontSize: '20px', color: '#57606a', padding: '0 2px', lineHeight: 1,
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Item list */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {GUIDE_ITEMS.map(({ key, label, description }, i) => (
+                <div
+                  key={key}
+                  ref={(el) => { listItemRefs.current[key] = el; }}
+                  style={{ display: 'flex', gap: '10px', alignItems: 'flex-start' }}
+                >
+                  <div
+                    style={{
+                      width: '20px', height: '20px', borderRadius: '50%',
+                      backgroundColor: '#0969DA', color: 'white',
+                      fontSize: '11px', fontWeight: '700',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flexShrink: 0, marginTop: '1px',
+                    }}
+                  >
+                    {i + 1}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: '#24292e', marginBottom: '2px' }}>
+                      {label}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#57606a', lineHeight: '1.4' }}>
+                      {description}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div style={{ marginTop: '14px', borderTop: '1px solid #f0f0f0', paddingTop: '10px', textAlign: 'center' }}>
+              <span style={{ fontSize: '11px', color: '#8b949e' }}>
+                Click backdrop or × to dismiss
+              </span>
+            </div>
+          </div>
+        </>,
         document.body
       )}
 
