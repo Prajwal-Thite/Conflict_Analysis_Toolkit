@@ -159,15 +159,16 @@ const MapWithGeofencingPage: React.FC = () => {
 
   useEffect(() => {
     if (!showTooltips) return;
-    const compute = () => {
-      const highlights = GUIDE_ITEMS.map(({ key }) => {
-        const r = btnRefs.current[key]?.getBoundingClientRect();
-        if (!r) return null;
-        return { key, left: r.left, top: r.top, width: r.width, height: r.height };
-      }).filter((v): v is BtnHighlight => v !== null);
-      setBtnHighlights(highlights);
-    };
-    const id = setTimeout(compute, 80);
+    const id = setTimeout(() => {
+      requestAnimationFrame(() => {
+        const highlights = GUIDE_ITEMS.map(({ key }) => {
+          const r = btnRefs.current[key]?.getBoundingClientRect();
+          if (!r) return null;
+          return { key, left: r.left, top: r.top, width: r.width, height: r.height };
+        }).filter((v): v is BtnHighlight => v !== null);
+        setBtnHighlights(highlights);
+      });
+    }, 80);
     return () => clearTimeout(id);
   }, [showTooltips]);
 
