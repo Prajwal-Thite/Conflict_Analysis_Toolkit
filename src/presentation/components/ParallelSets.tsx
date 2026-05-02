@@ -139,7 +139,7 @@ const ParallelSets: React.FC<ParallelSetsProps> = ({ data }) => {
       .text((d) => formatLabel(d.name));
 
     const uniqueCategories = [...new Set(data.map((d) => d.eventType))];
-    const legendGroup = svg.append('g').attr('transform', `translate(${width + 40}, 30)`);
+    const legendGroup = svg.append('g').attr('transform', `translate(${width - 180}, -130)`);
 
     const legendItems = legendGroup
       .selectAll('.legend-item')
